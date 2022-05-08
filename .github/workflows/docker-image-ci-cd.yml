@@ -36,11 +36,8 @@ jobs:
         MQ_PORT: ${{ secrets.MQ_PORT }}
         MQ_USERNAME: ${{ secrets.MQ_USERNAME }}
         MQ_PASSWORD: ${{ secrets.MQ_PASSWORD }}
-        GIT_REPO_URL: ${{ secrets.GIT_REPO_URL }}
-        GIT_ID: ${{ secrets.CONFIG_GIT_ID }}
-        GIT_PERSONAL_ACCESS_TOKEN: ${{ secrets.GIT_PERSONAL_ACCESS_TOKEN }}
-        ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
-        ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        CONFIG_HOSTNAME: ${{ secrets.CONFIG_IP }}
+        CONFIG_PORT: ${{ secrets.CONFIG_PORT }}
       run: ./gradlew test
     # build
     - name: build with gradle

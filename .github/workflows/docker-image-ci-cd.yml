@@ -2,9 +2,9 @@ name: Docker & EC2 CI CD
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, develop ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, develop ]
 env:
   DOCKER_IMAGE_NAME: devraul/iplease-ip-manage-server
   DOCKER_CONTAINER_NAME: ip-manage-server
@@ -52,6 +52,7 @@ jobs:
     - name: push docker image
       run: sudo docker push ${DOCKER_IMAGE_NAME}:${GITHUB_RUN_ID}
   cd:
+    if: github.event.pull_request.merged == 'true'
     runs-on: [ self-hosted, iplease-ip-manage ]
     needs: ci
     steps: 

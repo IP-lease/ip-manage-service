@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.table
+package com.iplease.server.ip.manage.assign.table
 
 import java.time.LocalDate
 

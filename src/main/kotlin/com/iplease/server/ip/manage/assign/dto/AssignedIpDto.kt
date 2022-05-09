@@ -7,5 +7,6 @@ data class AssignedIpDto(
     val issuerUuid: Long,
     val assignerUuid: Long,
     val assignedAt: LocalDate,
-    val expireAt: LocalDate
+    val expireAt: LocalDate,
+    val ip: IpDto
 )

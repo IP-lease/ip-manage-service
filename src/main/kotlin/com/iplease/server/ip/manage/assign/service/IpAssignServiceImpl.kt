@@ -4,6 +4,7 @@ import com.iplease.server.ip.manage.assign.data.dto.AssignedIpDto
 import com.iplease.server.ip.manage.assign.data.dto.IpDto
 import com.iplease.server.ip.manage.assign.repository.AssignedIpRepository
 import com.iplease.server.ip.manage.assign.data.table.AssignedIpTable
+import com.iplease.server.ip.manage.assign.exception.AlreadyExistsAssignedIpException
 import com.iplease.server.ip.manage.assign.exception.WrongExpireDateException
 import com.iplease.server.ip.manage.assign.util.DateUtil
 import org.springframework.stereotype.Service
@@ -17,10 +18,18 @@ class IpAssignServiceImpl(
 ) : IpAssignService {
     override fun assign(assignedIpDto: AssignedIpDto): Mono<AssignedIpDto> =
         checkExpireDate(assignedIpDto)
+            .flatMap { checkIpAddress(assignedIpDto.ip) }
             .map{ assignedIpDto }
             .map { AssignedIpTable(0L, it.issuerUuid, it.assignerUuid, it.assignedAt, it.expireAt, it.ip.first, it.ip.second, it.ip.third, it.ip.fourth) }
             .flatMap { assignedIpRepository.save(it) }
             .map { AssignedIpDto(it.uuid, it.issuerUuid, it.assignerUuid, it.assignedAt, it.expireAt, IpDto(it.ipFirst, it.ipSecond, it.ipThird, it.ipFourth)) }
+
+    private fun checkIpAddress(dto: IpDto): Mono<Any> =
+        existsByIp(dto)
+            .flatMap {
+                if(it) Mono.defer { Mono.error(AlreadyExistsAssignedIpException("${dto.first}.${dto.second}.${dto.third}.${dto.fourth}")) }
+                else Mono.just(it)
+            }
 
     private fun checkExpireDate(dto: AssignedIpDto): Mono<Any> =
         dto.toMono()
@@ -31,4 +40,6 @@ class IpAssignServiceImpl(
                 if(!dto.assignedAt.isAfter(dateUtil.dateNow())) Mono.defer { Mono.error(WrongExpireDateException(dto.expireAt, "할당 만료일은 익일 이후여야 합니다!"))}
                 else Mono.just(it)
             }
+
+    private fun existsByIp(ip: IpDto) = assignedIpRepository.existsByIpFirstAndIpSecondAndIpThirdAndIpFourth(ip.first, ip.second, ip.third, ip.fourth)
 }

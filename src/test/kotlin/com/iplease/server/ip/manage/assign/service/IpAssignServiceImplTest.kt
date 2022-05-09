@@ -4,6 +4,7 @@ import com.iplease.server.ip.manage.assign.data.dto.AssignedIpDto
 import com.iplease.server.ip.manage.assign.data.dto.IpDto
 import com.iplease.server.ip.manage.assign.repository.AssignedIpRepository
 import com.iplease.server.ip.manage.assign.data.table.AssignedIpTable
+import com.iplease.server.ip.manage.assign.exception.AlreadyExistsAssignedIpException
 import com.iplease.server.ip.manage.assign.exception.WrongExpireDateException
 import com.iplease.server.ip.manage.assign.util.DateUtil
 import org.junit.jupiter.api.BeforeEach
@@ -55,8 +56,9 @@ class IpAssignServiceImplTest {
     fun assignSuccess() {
         val dto = AssignedIpDto(uuid, issuerUuid, assignerUuid, assignedAt, expireAt, IpDto(ipFirst, ipSecond, ipThird, ipFourth))
         val table = AssignedIpTable(uuid, issuerUuid, assignerUuid, assignedAt, expireAt, ipFirst, ipSecond, ipThird, ipFourth)
-        whenever(dateUtil.dateNow()).thenReturn(expireAt.minusYears(2).withDayOfYear(1))
+        whenever(dateUtil.dateNow()).thenReturn(expireAt.minusYears(1).withDayOfYear(1))
         whenever(repository.save(table.copy(uuid = 0))).thenReturn(table.toMono())
+        whenever(repository.existsByIpFirstAndIpSecondAndIpThirdAndIpFourth(ipFirst, ipSecond, ipThird, ipFourth)).thenReturn(false.toMono())
 
         val result = ipAssignService.assign(dto).block()
 
@@ -64,7 +66,6 @@ class IpAssignServiceImplTest {
         verify(repository, times(1)).save(table.copy(uuid = 0))
     }
 
-    //expireAt 이 assignedAt 이전일 경우
     @Test @DisplayName("IP 할당 - 할당 만료일이 할당일 이전일 경우")
     fun assignFailureExpireIsBeforeThenAssignedAt() {
         val tmp = expireAt
@@ -75,6 +76,7 @@ class IpAssignServiceImplTest {
         val table = AssignedIpTable(uuid, issuerUuid, assignerUuid, assignedAt, expireAt, ipFirst, ipSecond, ipThird, ipFourth)
         whenever(dateUtil.dateNow()).thenReturn(expireAt.minusYears(2).withDayOfYear(1))
         whenever(repository.save(table.copy(uuid = 0))).thenReturn(table.toMono())
+        whenever(repository.existsByIpFirstAndIpSecondAndIpThirdAndIpFourth(ipFirst, ipSecond, ipThird, ipFourth)).thenReturn(false.toMono())
 
         val exception = assertThrows<WrongExpireDateException> { ipAssignService.assign(dto).block() }
 
@@ -82,17 +84,31 @@ class IpAssignServiceImplTest {
         verify(repository, times(0)).save(table.copy(uuid = 0))
     }
 
-    //expireAt 이 오늘 또는 과거일경우
     @Test @DisplayName("IP 할당 - 할당 만료일이 할당일 이전일 경우")
     fun assignFailureExpireIsBeforeThenNow() {
         val dto = AssignedIpDto(uuid, issuerUuid, assignerUuid, assignedAt, expireAt, IpDto(ipFirst, ipSecond, ipThird, ipFourth))
         val table = AssignedIpTable(uuid, issuerUuid, assignerUuid, assignedAt, expireAt, ipFirst, ipSecond, ipThird, ipFourth)
         whenever(dateUtil.dateNow()).thenReturn(expireAt.plusYears(1).withDayOfYear(1))
         whenever(repository.save(table.copy(uuid = 0))).thenReturn(table.toMono())
+        whenever(repository.existsByIpFirstAndIpSecondAndIpThirdAndIpFourth(ipFirst, ipSecond, ipThird, ipFourth)).thenReturn(false.toMono())
 
         val exception = assertThrows<WrongExpireDateException> { ipAssignService.assign(dto).block() }
 
         assert(exception.date == expireAt)
+        verify(repository, times(0)).save(table.copy(uuid = 0))
+    }
+
+    @Test @DisplayName("IP 할당 - 이미 할당된 ip 주소일 경우")
+    fun assignFailureAlreadyExists() {
+        val dto = AssignedIpDto(uuid, issuerUuid, assignerUuid, assignedAt, expireAt, IpDto(ipFirst, ipSecond, ipThird, ipFourth))
+        val table = AssignedIpTable(uuid, issuerUuid, assignerUuid, assignedAt, expireAt, ipFirst, ipSecond, ipThird, ipFourth)
+        whenever(dateUtil.dateNow()).thenReturn(expireAt.minusYears(1).withDayOfYear(1))
+        whenever(repository.save(table.copy(uuid = 0))).thenReturn(table.toMono())
+        whenever(repository.existsByIpFirstAndIpSecondAndIpThirdAndIpFourth(ipFirst, ipSecond, ipThird, ipFourth)).thenReturn(true.toMono())
+
+        val exception = assertThrows<AlreadyExistsAssignedIpException> { ipAssignService.assign(dto).block() }
+
+        assert(exception.ip == "$ipFirst.$ipSecond.$ipThird.$ipFourth")
         verify(repository, times(0)).save(table.copy(uuid = 0))
     }
 }

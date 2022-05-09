@@ -3,15 +3,15 @@ package com.iplease.server.ip.manage.assign.listener
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.iplease.server.ip.manage.assign.dto.AssignedIpDto
+import com.iplease.server.ip.manage.assign.data.dto.AssignedIpDto
 import com.iplease.server.ip.manage.assign.service.IpAssignService
-import com.iplease.server.ip.manage.event.dto.IpAssignedError
-import com.iplease.server.ip.manage.event.dto.IpAssignedEvent
+import com.iplease.server.ip.manage.event.data.dto.IpAssignedError
+import com.iplease.server.ip.manage.event.data.dto.IpAssignedEvent
 import com.iplease.server.ip.manage.event.listener.EventListener
 import com.iplease.server.ip.manage.event.service.EventPublishService
 import com.iplease.server.ip.manage.event.service.EventSubscribeService
-import com.iplease.server.ip.manage.event.type.Error
-import com.iplease.server.ip.manage.event.type.Event
+import com.iplease.server.ip.manage.event.data.type.Error
+import com.iplease.server.ip.manage.event.data.type.Event
 import org.springframework.amqp.core.Message
 import org.springframework.stereotype.Component
 

@@ -1,8 +1,9 @@
-package com.iplease.server.ip.manage.event.dto
+package com.iplease.server.ip.manage.assign.data.table
 
 import java.time.LocalDate
 
-data class IpAssignedError(
+data class AssignedIpTable (
+    val uuid: Long,
     val issuerUuid: Long,
     val assignerUuid: Long,
     val assignedAt: LocalDate,
@@ -10,6 +11,5 @@ data class IpAssignedError(
     val ipFirst: Int,
     val ipSecond: Int,
     val ipThird: Int,
-    val ipFourth: Int,
-    val throwable: Throwable
+    val ipFourth: Int
 )

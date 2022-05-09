@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.assign.dto
+package com.iplease.server.ip.manage.assign.data.dto
 
 import java.time.LocalDate
 

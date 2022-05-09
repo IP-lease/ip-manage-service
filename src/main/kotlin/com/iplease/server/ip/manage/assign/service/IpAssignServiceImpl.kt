@@ -1,9 +1,9 @@
 package com.iplease.server.ip.manage.assign.service
 
-import com.iplease.server.ip.manage.assign.dto.AssignedIpDto
-import com.iplease.server.ip.manage.assign.dto.IpDto
+import com.iplease.server.ip.manage.assign.data.dto.AssignedIpDto
+import com.iplease.server.ip.manage.assign.data.dto.IpDto
 import com.iplease.server.ip.manage.assign.repository.AssignedIpRepository
-import com.iplease.server.ip.manage.assign.table.AssignedIpTable
+import com.iplease.server.ip.manage.assign.data.table.AssignedIpTable
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 

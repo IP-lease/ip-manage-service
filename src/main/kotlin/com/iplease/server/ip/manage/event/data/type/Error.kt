@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.event.type
+package com.iplease.server.ip.manage.event.data.type
 
 enum class Error(
     val routingKey: String

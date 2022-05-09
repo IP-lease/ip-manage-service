@@ -1,7 +1,7 @@
-package com.iplease.server.ip.manage.event.dto
+package com.iplease.server.ip.manage.event.data.dto
 
-import com.iplease.server.ip.manage.assign.dto.AssignedIpDto
-import com.iplease.server.ip.manage.assign.dto.IpDto
+import com.iplease.server.ip.manage.assign.data.dto.AssignedIpDto
+import com.iplease.server.ip.manage.assign.data.dto.IpDto
 import java.time.LocalDate
 
 data class IpAssignedEvent (
@@ -16,5 +16,6 @@ data class IpAssignedEvent (
 ) {
     fun toDto() = AssignedIpDto(
         0L, issuerUuid, assignerUuid, assignedAt, expireAt, 
-        IpDto(ipFirst, ipSecond, ipThird, ipFourth))
+        IpDto(ipFirst, ipSecond, ipThird, ipFourth)
+    )
 }

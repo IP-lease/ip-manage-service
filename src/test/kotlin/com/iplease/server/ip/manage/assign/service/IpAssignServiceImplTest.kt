@@ -1,9 +1,9 @@
 package com.iplease.server.ip.manage.assign.service
 
-import com.iplease.server.ip.manage.assign.dto.AssignedIpDto
-import com.iplease.server.ip.manage.assign.dto.IpDto
+import com.iplease.server.ip.manage.assign.data.dto.AssignedIpDto
+import com.iplease.server.ip.manage.assign.data.dto.IpDto
 import com.iplease.server.ip.manage.assign.repository.AssignedIpRepository
-import com.iplease.server.ip.manage.assign.table.AssignedIpTable
+import com.iplease.server.ip.manage.assign.data.table.AssignedIpTable
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock

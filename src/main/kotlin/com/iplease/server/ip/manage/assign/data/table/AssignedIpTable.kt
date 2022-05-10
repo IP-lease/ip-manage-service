@@ -1,8 +1,12 @@
 package com.iplease.server.ip.manage.assign.data.table
 
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 
+@Table
 data class AssignedIpTable (
+    @Id
     val uuid: Long,
     val issuerUuid: Long,
     val assignerUuid: Long,

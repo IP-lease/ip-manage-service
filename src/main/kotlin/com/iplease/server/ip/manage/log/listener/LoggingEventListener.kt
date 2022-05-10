@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.log
+package com.iplease.server.ip.manage.log.listener
 
 import com.iplease.server.ip.manage.event.listener.EventListener
 import com.iplease.server.ip.manage.event.service.EventSubscribeService

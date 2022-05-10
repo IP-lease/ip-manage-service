@@ -41,7 +41,7 @@ class IpAssignServiceImpl(
                 if(!it.assignedAt.isBefore(it.expireAt)) Mono.defer { Mono.error(WrongExpireDateException(it.expireAt, "할당 만료일은 할당일 이후여야합니다!")) }
                 else Mono.just(it)
             }.flatMap {
-                if(!dto.assignedAt.isAfter(dateUtil.dateNow())) Mono.defer { Mono.error(WrongExpireDateException(dto.expireAt, "할당 만료일은 익일 이후여야 합니다!"))}
+                if(!dto.expireAt.isAfter(dateUtil.dateNow())) Mono.defer { Mono.error(WrongExpireDateException(dto.expireAt, "할당 만료일은 익일 이후여야 합니다!"))}
                 else Mono.just(it)
             }
 

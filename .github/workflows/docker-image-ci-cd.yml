@@ -49,7 +49,6 @@ jobs:
     - name: push docker image
       run: sudo docker push ${DOCKER_IMAGE_NAME}:${GITHUB_RUN_ID}
   cd:
-    if: github.event.pull_request.merged == 'true'
     runs-on: [ self-hosted, iplease-ip-manage ]
     needs: ci
     steps: 

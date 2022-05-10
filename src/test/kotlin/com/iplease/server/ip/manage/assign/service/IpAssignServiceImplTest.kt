@@ -1,14 +1,16 @@
 package com.iplease.server.ip.manage.assign.service
 
-import com.iplease.server.ip.manage.assign.data.dto.AssignedIpDto
-import com.iplease.server.ip.manage.assign.data.dto.IpDto
-import com.iplease.server.ip.manage.assign.repository.AssignedIpRepository
-import com.iplease.server.ip.manage.assign.data.table.AssignedIpTable
-import com.iplease.server.ip.manage.assign.exception.AlreadyExistsAssignedIpException
-import com.iplease.server.ip.manage.assign.exception.WrongExpireDateException
-import com.iplease.server.ip.manage.assign.util.DateUtil
-import com.iplease.server.ip.manage.log.service.LoggingService
-import com.iplease.server.ip.manage.log.type.LoggerType
+import com.iplease.server.ip.manage.global.assign.data.dto.AssignedIpDto
+import com.iplease.server.ip.manage.global.assign.data.dto.IpDto
+import com.iplease.server.ip.manage.global.assign.repository.AssignedIpRepository
+import com.iplease.server.ip.manage.global.assign.data.table.AssignedIpTable
+import com.iplease.server.ip.manage.domain.assign.exception.AlreadyExistsAssignedIpException
+import com.iplease.server.ip.manage.domain.assign.exception.WrongExpireDateException
+import com.iplease.server.ip.manage.domain.assign.util.DateUtil
+import com.iplease.server.ip.manage.domain.assign.service.IpAssignService
+import com.iplease.server.ip.manage.domain.assign.service.IpAssignServiceImpl
+import com.iplease.server.ip.manage.infra.log.service.LoggingService
+import com.iplease.server.ip.manage.infra.log.type.LoggerType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test

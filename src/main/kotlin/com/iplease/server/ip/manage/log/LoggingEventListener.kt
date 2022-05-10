@@ -3,7 +3,7 @@ package com.iplease.server.ip.manage.log
 import com.iplease.server.ip.manage.event.listener.EventListener
 import com.iplease.server.ip.manage.event.service.EventSubscribeService
 import com.iplease.server.ip.manage.log.service.LoggingService
-import com.iplease.server.ip.manage.log.type.LoggingActType
+import com.iplease.server.ip.manage.log.type.LoggerType
 import com.iplease.server.ip.manage.log.util.EventSubscribeInput
 import org.springframework.amqp.core.Message
 import org.springframework.stereotype.Component
@@ -21,7 +21,7 @@ class LoggingEventListener(
         loggingService.withLog(
             EventSubscribeInput(message.messageProperties.receivedRoutingKey, message.body!!.toString(Charsets.UTF_8)),
             Unit.toMono(),
-            LoggingActType.EVENT_SUBSCRIBE_LOGGER
+            LoggerType.EVENT_SUBSCRIBE_LOGGER
         ).block()
     }
 }

@@ -7,14 +7,14 @@ import com.iplease.server.ip.manage.assign.data.table.AssignedIpTable
 import com.iplease.server.ip.manage.assign.exception.AlreadyExistsAssignedIpException
 import com.iplease.server.ip.manage.assign.exception.WrongExpireDateException
 import com.iplease.server.ip.manage.assign.util.DateUtil
+import com.iplease.server.ip.manage.log.service.LoggingService
+import com.iplease.server.ip.manage.log.type.LoggerType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
+import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.time.LocalDate
 import kotlin.properties.Delegates
@@ -24,6 +24,7 @@ class IpAssignServiceImplTest {
     private lateinit var repository: AssignedIpRepository
     private lateinit var dateUtil: DateUtil
     private lateinit var ipAssignService: IpAssignService
+    private lateinit var loggingService: LoggingService
 
     private var uuid by Delegates.notNull<Long>()
     private var issuerUuid by Delegates.notNull<Long>()
@@ -39,7 +40,10 @@ class IpAssignServiceImplTest {
     fun setUp() {
         repository = mock()
         dateUtil = mock ()
-        ipAssignService = IpAssignServiceImpl(dateUtil, repository)
+        loggingService = mock() {
+            on{ withLog(any<AssignedIpDto>(), any<Mono<AssignedIpDto>>(), eq(LoggerType.IP_ASSIGN_LOGGER)) }.thenAnswer{ it.arguments[1] as Mono<*> }
+        }
+        ipAssignService = IpAssignServiceImpl(dateUtil, repository, loggingService)
 
         uuid = Random.nextLong()
         issuerUuid = Random.nextLong()
@@ -60,7 +64,7 @@ class IpAssignServiceImplTest {
         whenever(repository.save(table.copy(uuid = 0))).thenReturn(table.toMono())
         whenever(repository.existsByIpFirstAndIpSecondAndIpThirdAndIpFourth(ipFirst, ipSecond, ipThird, ipFourth)).thenReturn(false.toMono())
 
-        val result = ipAssignService.assign(dto).block()
+        val result = ipAssignService.assign(dto).block()!!
 
         assert(result == dto)
         verify(repository, times(1)).save(table.copy(uuid = 0))

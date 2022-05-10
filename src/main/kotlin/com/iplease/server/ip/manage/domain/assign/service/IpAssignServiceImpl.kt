@@ -1,9 +1,9 @@
 package com.iplease.server.ip.manage.domain.assign.service
 
-import com.iplease.server.ip.manage.global.assign.data.dto.AssignedIpDto
-import com.iplease.server.ip.manage.global.assign.data.dto.IpDto
-import com.iplease.server.ip.manage.global.assign.repository.AssignedIpRepository
-import com.iplease.server.ip.manage.global.assign.data.table.AssignedIpTable
+import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
+import com.iplease.server.ip.manage.global.common.data.dto.IpDto
+import com.iplease.server.ip.manage.global.common.repository.AssignedIpRepository
+import com.iplease.server.ip.manage.global.common.data.table.AssignedIpTable
 import com.iplease.server.ip.manage.domain.assign.exception.AlreadyExistsAssignedIpException
 import com.iplease.server.ip.manage.domain.assign.exception.WrongExpireDateException
 import com.iplease.server.ip.manage.domain.assign.util.DateUtil

@@ -1,7 +1,7 @@
 package com.iplease.server.ip.manage.infra.event.data.dto
 
-import com.iplease.server.ip.manage.global.assign.data.dto.AssignedIpDto
-import com.iplease.server.ip.manage.global.assign.data.dto.IpDto
+import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
+import com.iplease.server.ip.manage.global.common.data.dto.IpDto
 import java.time.LocalDate
 
 data class IpAssignedEvent (

@@ -1,6 +1,6 @@
 package com.iplease.server.ip.manage.infra.log.util
 
-import com.iplease.server.ip.manage.global.assign.data.dto.AssignedIpDto
+import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 

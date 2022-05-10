@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.global.assign.data.dto
+package com.iplease.server.ip.manage.global.common.data.dto
 
 data class IpDto (
     val first: Int,

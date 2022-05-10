@@ -1,6 +1,6 @@
-package com.iplease.server.ip.manage.global.assign.repository
+package com.iplease.server.ip.manage.global.common.repository
 
-import com.iplease.server.ip.manage.global.assign.data.table.AssignedIpTable
+import com.iplease.server.ip.manage.global.common.data.table.AssignedIpTable
 import org.springframework.data.r2dbc.repository.R2dbcRepository
 import reactor.core.publisher.Mono
 

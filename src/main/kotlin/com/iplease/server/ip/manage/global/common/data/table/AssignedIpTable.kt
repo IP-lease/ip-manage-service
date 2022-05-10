@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.global.assign.data.table
+package com.iplease.server.ip.manage.global.common.data.table
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table

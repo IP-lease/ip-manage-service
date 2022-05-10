@@ -3,8 +3,8 @@ package com.iplease.server.ip.manage.assign.listener
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.iplease.server.ip.manage.global.assign.data.dto.AssignedIpDto
-import com.iplease.server.ip.manage.global.assign.data.dto.IpDto
+import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
+import com.iplease.server.ip.manage.global.common.data.dto.IpDto
 import com.iplease.server.ip.manage.domain.assign.service.IpAssignService
 import com.iplease.server.ip.manage.domain.assign.listener.IpAssignedEventListener
 import com.iplease.server.ip.manage.infra.event.data.dto.IpAssignedError

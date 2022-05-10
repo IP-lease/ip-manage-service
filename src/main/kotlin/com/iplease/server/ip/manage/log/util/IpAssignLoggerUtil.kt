@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class IpAssignLoggerUtil: SimpleLoggerUtil<AssignedIpDto, AssignedIpDto>(
     LoggerFactory.getLogger(IpAssignLoggerUtil::class.java),
-    "[IP 할당 - 등록]"
+    "[SERV] [IP 할당 - 등록]"
 ) {
     override fun logOnStart(input: AssignedIpDto, uuid: String) {
         log("IP 할당 등록을 진행합니다.", uuid, true) { info(it) }

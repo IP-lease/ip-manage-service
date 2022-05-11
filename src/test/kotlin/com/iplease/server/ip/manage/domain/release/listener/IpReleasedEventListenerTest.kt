@@ -1,8 +1,7 @@
-package com.iplease.server.ip.manage.release.listener
+package com.iplease.server.ip.manage.domain.release.listener
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.iplease.server.ip.manage.domain.release.listener.IpReleasedEventListener
 import com.iplease.server.ip.manage.domain.release.service.IpReleaseService
 import com.iplease.server.ip.manage.infra.event.data.dto.IpReleasedError
 import com.iplease.server.ip.manage.infra.event.data.type.Event

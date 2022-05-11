@@ -1,7 +1,6 @@
-package com.iplease.server.ip.manage.release.service
+package com.iplease.server.ip.manage.domain.release.service
 
 import com.iplease.server.ip.manage.domain.release.exception.UnknownAssignedIpException
-import com.iplease.server.ip.manage.domain.release.service.IpReleaseServiceImpl
 import com.iplease.server.ip.manage.global.common.repository.AssignedIpRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName

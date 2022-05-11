@@ -1,7 +1,8 @@
 package com.iplease.server.ip.manage.global.release
 
-import java.time.LocalDate
+import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
+import reactor.core.publisher.Mono
 
 interface IpReleaseReserveService {
-    fun reserve(uuid: Long, issuerUuid: Long, expireAt: LocalDate)
+    fun reserve(dto: AssignedIpDto): Mono<AssignedIpDto>
 }

@@ -1,34 +1,30 @@
 package com.iplease.server.ip.manage.domain.release.service
 
-import com.iplease.server.ip.manage.domain.assign.util.DateUtil
+import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
 import com.iplease.server.ip.manage.global.release.IpReleaseReserveService
-import com.iplease.server.ip.manage.infra.log.service.LoggingService
 import com.iplease.server.ip.release.global.common.data.type.Role
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Service
 class HttpIpReleaseReserveService(
-    private val webClientBuilder: WebClient.Builder,
-    private val loggingService: LoggingService,
-    private val dateUtil: DateUtil
+    private val webClientBuilder: WebClient.Builder
 ): IpReleaseReserveService {
-    override fun reserve(uuid: Long, issuerUuid: Long, expireAt: LocalDate) {
-        val releaseAt = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(expireAt)
+    override fun reserve(dto: AssignedIpDto): Mono<AssignedIpDto> =
         webClientBuilder
             .baseUrl("http://ip-release-server")
             .build()
             .post()
-            .uri("/api/v1/ip/release/reserve/$uuid?releaseAt=$releaseAt")
-            .header("X-Login-Account-Uuid", issuerUuid.toString())
+            .uri("/api/v1/ip/release/reserve/${dto.uuid}?releaseAt=${ DateTimeFormatter.ofPattern("yyyy-MM-dd").format(dto.expireAt) }")
+            .header("X-Login-Account-Uuid", dto.issuerUuid.toString())
             .header("X-Login-Account-Role", Role.OPERATOR.toString())
             .retrieve()
             .bodyToMono(IpReleaseReserveResponseDto::class.java)
-            .onErrorReturn(IpReleaseReserveResponseDto(0L, 0L, 0L, dateUtil.dateNow()))
-            .block()
-    }
+            .map { dto }
+            .onErrorReturn(dto)
 }
 
 data class IpReleaseReserveResponseDto (

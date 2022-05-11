@@ -28,7 +28,6 @@ class IpReleasedEventListener(
             .runCatching { readValue(message.body, IpReleasedEvent::class.java) }
             .onFailure { throwable -> eventPublishService.publish(Error.IP_RELEASED.routingKey, IpReleasedError(0L, 0L, throwable)) }
             .onSuccess { release(it) }
-
     }
 
     private fun release(event: IpReleasedEvent) {

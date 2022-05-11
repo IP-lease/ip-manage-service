@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'com.iplease'
-version '0.0.1-rc2'
+version '0.0.1-RELEASE'
 
 repositories {
     mavenCentral()

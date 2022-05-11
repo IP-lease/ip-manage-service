@@ -30,7 +30,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(files("libs/proto-lib-0.0.1-rc2.jar"))
+    implementation(files("libs/proto-lib-0.0.1-RELEASE.jar"))
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.iplease.server.ip.manage.domain.release.service.IpReleaseService
 import com.iplease.server.ip.manage.infra.event.data.dto.IpReleasedError
 import com.iplease.server.ip.manage.infra.event.data.dto.IpReleasedEvent
+import com.iplease.server.ip.manage.infra.event.data.dto.WrongPayloadError
 import com.iplease.server.ip.manage.infra.event.data.type.Error
 import com.iplease.server.ip.manage.infra.event.data.type.Event
 import com.iplease.server.ip.manage.infra.event.listener.EventListener
@@ -26,9 +27,11 @@ class IpReleasedEventListener(
         ObjectMapper()
             .registerKotlinModule()
             .runCatching { readValue(message.body, IpReleasedEvent::class.java) }
-            .onFailure { throwable -> eventPublishService.publish(Error.IP_RELEASED.routingKey, IpReleasedError(0L, 0L, throwable)) }
+            .onFailure { eventPublishService.publish(
+                Error.WRONG_PAYLOAD.routingKey,
+                WrongPayloadError(Event.IP_RELEASED, message.body.toString())
+            ) }
             .onSuccess { release(it) }
-
     }
 
     private fun release(event: IpReleasedEvent) {

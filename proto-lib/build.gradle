@@ -1,10 +1,12 @@
+
+
 plugins {
     id 'java'
     id("com.google.protobuf") version ("0.8.14")
 }
 
 group 'com.iplease'
-version '0.0.1-rc1'
+version '0.0.1-rc2'
 
 repositories {
     mavenCentral()
@@ -27,6 +29,7 @@ dependencies {
     compileOnly("javax.annotation:javax.annotation-api:1.3.2")
     runtimeOnly("org.slf4j:slf4j-simple:1.7.36")
     testImplementation("com.linecorp.armeria:armeria-junit5:1.16.0")
+    implementation 'com.google.api.grpc:proto-google-common-protos:2.8.3'
     implementation("io.grpc:grpc-protobuf:1.45.1")
     implementation("io.grpc:grpc-stub:1.45.1")
     compileOnly("jakarta.annotation:jakarta.annotation-api:2.0.0")

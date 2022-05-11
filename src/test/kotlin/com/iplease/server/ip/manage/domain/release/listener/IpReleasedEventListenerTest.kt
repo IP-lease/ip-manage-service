@@ -8,6 +8,7 @@ import com.iplease.server.ip.manage.infra.event.data.type.Event
 import com.iplease.server.ip.manage.infra.event.service.EventPublishService
 import com.iplease.server.ip.manage.infra.event.service.EventSubscribeService
 import com.iplease.server.ip.manage.infra.event.data.dto.IpReleasedEvent
+import com.iplease.server.ip.manage.infra.event.data.dto.WrongPayloadError
 import com.iplease.server.ip.manage.infra.event.data.type.Error
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -60,7 +61,7 @@ class IpReleasedEventListenerTest {
 
         target.handle(message)
         verify(ipReleaseService, times(1)).release(assignedIpUuid)
-        verify(eventPublishService, times(0)).publish(any(), any())
+        verify(eventPublishService, never()).publish(any(), any())
     }
 
     //만약 Service 단에서 에외 발생시 IpReleaseError 를 전파하는지 테스트한다
@@ -88,20 +89,24 @@ class IpReleasedEventListenerTest {
         whenever(ipReleaseService.release(assignedIpUuid)).thenReturn(Unit.toMono())
 
         target.handle(message)
-        verify(ipReleaseService, times(0)).release(any())
-        verify(eventPublishService, times(0)).publish(any(), any())
+        verify(ipReleaseService, never()).release(any())
+        verify(eventPublishService, never()).publish(any(), any())
     }
 
     //만약 메세지의 페이로드(EventData) 가 올바르지 않을 경우, IpReleaseError 를 전파하는지 테스트한다
     @Test @DisplayName("이벤트 구독 - 잘못된 이벤트를 구독하였을 경우")
-    fun subscribeWrongPayload() {
+    fun subscribeMalformedPayload() {
+        val eventStr = "test${Random.nextLong()}"
         whenever(messageProperties.receivedRoutingKey).thenReturn(Event.IP_RELEASED.routingKey)
         whenever(message.messageProperties).thenReturn(messageProperties)
-        whenever(message.body).thenReturn("test${Random.nextLong()}".toByteArray())
+        whenever(message.body).thenReturn(eventStr.toByteArray())
         whenever(ipReleaseService.release(assignedIpUuid)).thenReturn(Unit.toMono())
 
         target.handle(message)
-        verify(ipReleaseService, times(0)).release(any())
-        verify(eventPublishService, times(1)).publish(eq(Error.IP_RELEASED.routingKey), any())
+        verify(ipReleaseService, never()).release(any())
+        verify(eventPublishService, times(1)).publish(
+            Error.WRONG_PAYLOAD.routingKey,
+            WrongPayloadError(Event.IP_RELEASED, message.body.toString())
+        )
     }
 }

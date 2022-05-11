@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
 import com.iplease.server.ip.manage.domain.assign.service.IpAssignService
+import com.iplease.server.ip.manage.global.release.IpReleaseReserveService
 import com.iplease.server.ip.manage.infra.event.data.dto.IpAssignedError
 import com.iplease.server.ip.manage.infra.event.data.dto.IpAssignedEvent
 import com.iplease.server.ip.manage.infra.event.listener.EventListener
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component
 class IpAssignedEventListener(
     private val ipAssignService: IpAssignService,
     private val eventPublishService: EventPublishService,
+    private val ipReleaseReserveService: IpReleaseReserveService,
     eventSubscribeService: EventSubscribeService
 ): EventListener {
     init { eventSubscribeService.addListener(this) }
@@ -31,14 +33,19 @@ class IpAssignedEventListener(
             .readValue(message.body, IpAssignedEvent::class.java)
             .toDto()
             .let { assign(it) }
+            .also { reserveRelease(it) }
     }
 
-    private fun assign(dto: AssignedIpDto) {
+    //TODO 로직 처리중에 에러가 날경우 이를 전파해야할지 아니면 예약이 안된상태로 IP를 할당해야하는지 고민해보기
+    private fun reserveRelease(dto: AssignedIpDto) {
+        ipReleaseReserveService.reserve(dto.uuid, dto.issuerUuid, dto.expireAt)
+    }
+
+    private fun assign(dto: AssignedIpDto) =
         ipAssignService.assign(dto)
             .doOnError{eventPublishService.publish(Error.IP_ASSIGNED.routingKey, dto.error(it)) }
             .onErrorReturn(dto)
-            .block()
-    }
+            .block()!!
 
     private fun AssignedIpDto.error(throwable: Throwable) = IpAssignedError(
         issuerUuid, assignerUuid, assignedAt, expireAt,

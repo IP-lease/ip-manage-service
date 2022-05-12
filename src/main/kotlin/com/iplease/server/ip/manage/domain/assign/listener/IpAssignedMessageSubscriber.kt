@@ -32,7 +32,7 @@ class IpAssignedMessageSubscriber(
             .map{ it.readValue(message.body, IpAssignedEvent::class.java) }
             .onErrorContinue {_, _ ->
                 messagePublishService.publish(
-                    Error.WRONG_PAYLOAD.routingKey,
+                    Error.WRONG_PAYLOAD,
                     WrongPayloadError(Event.IP_ASSIGNED, message.body.toString())
                 )
             }.map{ it.toDto() }

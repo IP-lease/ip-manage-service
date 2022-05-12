@@ -14,7 +14,7 @@ class IpReleaseEventHandlerImpl(
     private val ipReleaseService: IpReleaseService
 ): IpReleaseEventHandler {
     override fun onStart(dto: ReleasedIpDto) = dto.toMono().flatMap { ipReleaseService.release(it.assignedIpUuid) }
-    override fun onError(dto: ReleasedIpDto, error: Throwable) { messagePublishService.publish(Error.IP_RELEASED.routingKey, dto.error(error)) }
+    override fun onError(dto: ReleasedIpDto, error: Throwable) { messagePublishService.publish(Error.IP_RELEASED, dto.error(error)) }
     override fun onComplete(request: ReleasedIpDto, response: Unit) {}
 
     private fun ReleasedIpDto.error(throwable: Throwable) = IpReleasedError(assignedIpUuid, issuerUuid, throwable)

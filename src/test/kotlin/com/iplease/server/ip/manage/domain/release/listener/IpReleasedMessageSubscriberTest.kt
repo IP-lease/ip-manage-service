@@ -65,7 +65,7 @@ class IpReleasedMessageSubscriberTest {
 
         target.subscribe(message)
         verify(ipReleaseEventHandler, times(1)).handle(releasedIpDto, Unit)
-        verify(messagePublishService, never()).publish(any(), any())
+        verify(messagePublishService, never()).publish(any<Error>(), any())
     }
 
     //RoutingKey 가 IpRelease 가 아닐경우 어떠한 처리없이 로직을 종료하는지 테스트한다.
@@ -77,7 +77,7 @@ class IpReleasedMessageSubscriberTest {
 
         target.subscribe(message)
         verify(ipReleaseEventHandler, never()).handle(any(), any())
-        verify(messagePublishService, never()).publish(any(), any())
+        verify(messagePublishService, never()).publish(any<Error>(), any())
     }
 
     //만약 메세지의 페이로드(EventData) 가 올바르지 않을 경우, IpReleaseError 를 전파하는지 테스트한다
@@ -91,7 +91,7 @@ class IpReleasedMessageSubscriberTest {
         target.subscribe(message)
         verify(ipReleaseEventHandler, never()).handle(any(), any())
         verify(messagePublishService, times(1)).publish(
-            Error.WRONG_PAYLOAD.routingKey,
+            Error.WRONG_PAYLOAD,
             WrongPayloadError(Event.IP_RELEASED, message.body.toString())
         )
     }

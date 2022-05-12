@@ -21,7 +21,7 @@ class IpAssignedEventHandlerImpl(
             .flatMap { ipReleaseReserveService.reserve(it) } //TODO 로직 처리중에 에러가 날경우 이를 전파해야할지 아니면 예약이 안된상태로 IP를 할당해야하는지 고민해보기
 
     override fun onError(dto: AssignedIpDto, error: Throwable) {
-        messagePublishService.publish(Error.IP_ASSIGNED.routingKey, dto.error(error))
+        messagePublishService.publish(Error.IP_ASSIGNED, dto.error(error))
     }
 
     override fun onComplete(request: AssignedIpDto, response: AssignedIpDto) {}

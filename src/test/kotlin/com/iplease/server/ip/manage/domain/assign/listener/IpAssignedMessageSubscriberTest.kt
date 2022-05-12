@@ -83,7 +83,7 @@ class IpAssignedMessageSubscriberTest {
 
         target.subscribe(message)
         verify(ipAssignedEventHandler, times(1)).handle(eq(assignedIpDto.copy(uuid = 0)), any())
-        verify(messagePublishService, never()).publish(any(), any())
+        verify(messagePublishService, never()).publish(any<Error>(), any())
     }
 
     @Test @DisplayName("이벤트 구독 - 잘못된 이벤트를 구독하였을 경우")
@@ -96,7 +96,7 @@ class IpAssignedMessageSubscriberTest {
         target.subscribe(message)
         verify(ipAssignedEventHandler, never()).handle(eq(assignedIpDto), any())
         verify(messagePublishService, times(1)).publish(
-            Error.WRONG_PAYLOAD.routingKey,
+            Error.WRONG_PAYLOAD,
             WrongPayloadError(Event.IP_ASSIGNED, message.body.toString())
         )
     }

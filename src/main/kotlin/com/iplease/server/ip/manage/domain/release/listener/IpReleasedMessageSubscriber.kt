@@ -30,7 +30,7 @@ class IpReleasedMessageSubscriber(
             .map { it.readValue(message.body, IpReleasedEvent::class.java) }
             .onErrorContinue{_, _ ->
                 messagePublishService.publish(
-                    Error.WRONG_PAYLOAD.routingKey,
+                    Error.WRONG_PAYLOAD,
                     WrongPayloadError(Event.IP_RELEASED, message.body.toString())
                 )
             }

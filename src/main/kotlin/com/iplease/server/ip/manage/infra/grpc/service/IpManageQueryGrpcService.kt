@@ -9,21 +9,26 @@ import com.iplease.lib.ip.manage.ReactorIpManageQueryServiceGrpc
 import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
 import com.iplease.server.ip.manage.global.common.data.dto.IpDto
 import com.iplease.server.ip.manage.global.common.service.IpManageQueryService
+import com.iplease.server.ip.manage.infra.log.service.LoggingService
+import com.iplease.server.ip.manage.infra.log.type.LoggerType
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import java.time.LocalDate
 
 @Service
 class IpManageQueryGrpcService(
-    val ipManageQueryService: IpManageQueryService
+    val ipManageQueryService: IpManageQueryService,
+    val loggingService: LoggingService
 ): ReactorIpManageQueryServiceGrpc.IpManageQueryServiceImplBase() {
     override fun existsAssignedIpByUuid(request: Mono<Int64Value>): Mono<BoolValue> =
         request.flatMap { ipManageQueryService.existsAssignedIpByUuid(it.value) }
             .map { it.toGrpcMessage() }
+            .let { loggingService.withLog(request, it, LoggerType.IP_MANAGE_QUERY_EXIST_LOGGER) }
 
     override fun getAssignedIpByUuid(request: Mono<Int64Value>): Mono<AssignedIp> =
         request.flatMap { ipManageQueryService.getAssignedIpByUuid(it.value) }
             .map { it.toGrpcMessage() }
+            .let { loggingService.withLog(request, it, LoggerType.IP_MANAGE_QUERY_GET_LOGGER) }
 
     private fun AssignedIpDto.toGrpcMessage() =
         AssignedIp.newBuilder()

@@ -2,6 +2,8 @@ package com.iplease.server.ip.manage.domain.release.service
 
 import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
 import com.iplease.server.ip.manage.global.release.IpReleaseReserveService
+import com.iplease.server.ip.manage.infra.log.service.LoggingService
+import com.iplease.server.ip.manage.infra.log.type.LoggerType
 import com.iplease.server.ip.release.global.common.data.type.Role
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -11,7 +13,8 @@ import java.time.format.DateTimeFormatter
 
 @Service
 class HttpIpReleaseReserveService(
-    private val webClientBuilder: WebClient.Builder
+    private val webClientBuilder: WebClient.Builder,
+    private val loggingService: LoggingService
 ): IpReleaseReserveService {
     override fun reserve(dto: AssignedIpDto): Mono<AssignedIpDto> =
         webClientBuilder
@@ -24,6 +27,7 @@ class HttpIpReleaseReserveService(
             .retrieve()
             .bodyToMono(IpReleaseReserveResponseDto::class.java)
             .map { dto }
+            .let { loggingService.withLog(dto, it, LoggerType.IP_RELEASE_RESERVE_SERVICE_LOGGER) }
             .onErrorReturn(dto)
 }
 

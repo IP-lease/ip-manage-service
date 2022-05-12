@@ -17,6 +17,6 @@ class LoggingServiceImpl(
         when (type) {
             LoggerType.EVENT_PUBLISH_LOGGER -> eventPublishLoggerUtil
             LoggerType.EVENT_SUBSCRIBE_LOGGER -> eventSubscribeLoggerUtil
-            LoggerType.IP_ASSIGN_LOGGER -> ipAssignLoggerUtil
+            LoggerType.IP_ASSIGN_SERVICE_LOGGER -> ipAssignLoggerUtil
         } as LoggerUtil<IN, OUT>
 }

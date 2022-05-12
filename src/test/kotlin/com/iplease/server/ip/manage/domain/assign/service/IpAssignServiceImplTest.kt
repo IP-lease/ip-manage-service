@@ -41,7 +41,7 @@ class IpAssignServiceImplTest {
         repository = mock()
         dateUtil = mock ()
         loggingService = mock() {
-            on{ withLog(any<AssignedIpDto>(), any<Mono<AssignedIpDto>>(), eq(LoggerType.IP_ASSIGN_LOGGER)) }.thenAnswer{ it.arguments[1] as Mono<*> }
+            on{ withLog(any<AssignedIpDto>(), any<Mono<AssignedIpDto>>(), eq(LoggerType.IP_ASSIGN_SERVICE_LOGGER)) }.thenAnswer{ it.arguments[1] as Mono<*> }
         }
         ipAssignService = IpAssignServiceImpl(dateUtil, repository, loggingService)
 

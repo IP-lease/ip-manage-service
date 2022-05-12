@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.infra.event.service
+package com.iplease.server.ip.manage.infra.message.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule

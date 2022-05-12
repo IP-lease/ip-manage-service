@@ -3,9 +3,9 @@ package com.iplease.server.ip.manage.domain.assign.handler
 import com.iplease.server.ip.manage.domain.assign.service.IpAssignService
 import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
 import com.iplease.server.ip.manage.global.release.IpReleaseReserveService
-import com.iplease.server.ip.manage.infra.event.data.dto.IpAssignedError
-import com.iplease.server.ip.manage.infra.event.data.type.Error
-import com.iplease.server.ip.manage.infra.event.service.EventPublishService
+import com.iplease.server.ip.manage.infra.message.data.dto.IpAssignedError
+import com.iplease.server.ip.manage.infra.message.data.type.Error
+import com.iplease.server.ip.manage.infra.message.service.EventPublishService
 import org.springframework.stereotype.Component
 import reactor.kotlin.core.publisher.toMono
 

@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.infra.event.listener
+package com.iplease.server.ip.manage.infra.message.listener
 
 import org.springframework.amqp.core.Message
 

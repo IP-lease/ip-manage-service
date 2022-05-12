@@ -3,13 +3,13 @@ package com.iplease.server.ip.manage.domain.release.listener
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.iplease.server.ip.manage.domain.release.handler.IpReleaseEventHandler
-import com.iplease.server.ip.manage.infra.event.data.dto.IpReleasedEvent
-import com.iplease.server.ip.manage.infra.event.data.dto.WrongPayloadError
-import com.iplease.server.ip.manage.infra.event.data.type.Error
-import com.iplease.server.ip.manage.infra.event.data.type.Event
-import com.iplease.server.ip.manage.infra.event.listener.EventListener
-import com.iplease.server.ip.manage.infra.event.service.EventPublishService
-import com.iplease.server.ip.manage.infra.event.service.EventSubscribeService
+import com.iplease.server.ip.manage.infra.message.data.dto.IpReleasedEvent
+import com.iplease.server.ip.manage.infra.message.data.dto.WrongPayloadError
+import com.iplease.server.ip.manage.infra.message.data.type.Error
+import com.iplease.server.ip.manage.infra.message.data.type.Event
+import com.iplease.server.ip.manage.infra.message.listener.EventListener
+import com.iplease.server.ip.manage.infra.message.service.EventPublishService
+import com.iplease.server.ip.manage.infra.message.service.EventSubscribeService
 import org.springframework.amqp.core.Message
 import reactor.kotlin.core.publisher.toMono
 

@@ -1,6 +1,6 @@
-package com.iplease.server.ip.manage.infra.event.data.dto
+package com.iplease.server.ip.manage.infra.message.data.dto
 
-import com.iplease.server.ip.manage.infra.event.data.type.Event
+import com.iplease.server.ip.manage.infra.message.data.type.Event
 
 data class WrongPayloadError(
     private val originEvent: Event,

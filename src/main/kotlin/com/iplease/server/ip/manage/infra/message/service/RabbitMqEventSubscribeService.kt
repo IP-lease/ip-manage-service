@@ -1,6 +1,6 @@
-package com.iplease.server.ip.manage.infra.event.service
+package com.iplease.server.ip.manage.infra.message.service
 
-import com.iplease.server.ip.manage.infra.event.listener.EventListener
+import com.iplease.server.ip.manage.infra.message.listener.EventListener
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Service

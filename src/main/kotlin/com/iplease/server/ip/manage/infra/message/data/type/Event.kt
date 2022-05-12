@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.infra.event.data.type
+package com.iplease.server.ip.manage.infra.message.data.type
 
 enum class Event(
     val routingKey: String

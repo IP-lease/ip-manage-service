@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.infra.event.data.dto
+package com.iplease.server.ip.manage.infra.message.data.dto
 
 data class IpReleasedError(
     val assignedIpUuid: Long,

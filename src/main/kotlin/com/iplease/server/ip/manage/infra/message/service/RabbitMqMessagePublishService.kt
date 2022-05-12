@@ -11,10 +11,10 @@ import org.springframework.stereotype.Service
 import reactor.kotlin.core.publisher.toMono
 
 @Service
-class RabbitMqEventPublishService(
+class RabbitMqMessagePublishService(
     val rabbitTemplate: RabbitTemplate,
     val loggingService: LoggingService
-): EventPublishService {
+): MessagePublishService {
     companion object { const val EXCHANGE_NAME = "iplease.event" }
     override fun <T: Any> publish(routingKey: String, data: T): T =
         ObjectMapper().registerModule(KotlinModule()).registerModule(JavaTimeModule()).writeValueAsString(data)

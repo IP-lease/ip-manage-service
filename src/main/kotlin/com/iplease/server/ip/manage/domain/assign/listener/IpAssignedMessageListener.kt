@@ -7,21 +7,21 @@ import com.iplease.server.ip.manage.domain.assign.handler.IpAssignedEventHandler
 import com.iplease.server.ip.manage.infra.message.data.dto.IpAssignedEvent
 import com.iplease.server.ip.manage.infra.message.data.dto.WrongPayloadError
 import com.iplease.server.ip.manage.infra.message.data.type.Error
-import com.iplease.server.ip.manage.infra.message.listener.EventListener
-import com.iplease.server.ip.manage.infra.message.service.EventSubscribeService
+import com.iplease.server.ip.manage.infra.message.listener.MessageListener
+import com.iplease.server.ip.manage.infra.message.service.MessageSubscribeService
 import com.iplease.server.ip.manage.infra.message.data.type.Event
-import com.iplease.server.ip.manage.infra.message.service.EventPublishService
+import com.iplease.server.ip.manage.infra.message.service.MessagePublishService
 import org.springframework.amqp.core.Message
 import org.springframework.stereotype.Component
 import reactor.kotlin.core.publisher.toMono
 
 @Component
-class IpAssignedEventListener(
+class IpAssignedMessageListener(
     private val ipAssignedEventHandler: IpAssignedEventHandler,
-    private val eventPublishService: EventPublishService,
-    eventSubscribeService: EventSubscribeService
-): EventListener {
-    init { eventSubscribeService.addListener(this) }
+    private val messagePublishService: MessagePublishService,
+    messageSubscribeService: MessageSubscribeService
+): MessageListener {
+    init { messageSubscribeService.addListener(this) }
 
     override fun handle(message: Message) {
         if(message.messageProperties.receivedRoutingKey != Event.IP_ASSIGNED.routingKey) return
@@ -31,7 +31,7 @@ class IpAssignedEventListener(
             .toMono()
             .map{ it.readValue(message.body, IpAssignedEvent::class.java) }
             .onErrorContinue {_, _ ->
-                eventPublishService.publish(
+                messagePublishService.publish(
                     Error.WRONG_PAYLOAD.routingKey,
                     WrongPayloadError(Event.IP_ASSIGNED, message.body.toString())
                 )

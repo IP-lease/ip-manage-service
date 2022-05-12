@@ -7,19 +7,19 @@ import com.iplease.server.ip.manage.infra.message.data.dto.IpReleasedEvent
 import com.iplease.server.ip.manage.infra.message.data.dto.WrongPayloadError
 import com.iplease.server.ip.manage.infra.message.data.type.Error
 import com.iplease.server.ip.manage.infra.message.data.type.Event
-import com.iplease.server.ip.manage.infra.message.listener.EventListener
-import com.iplease.server.ip.manage.infra.message.service.EventPublishService
-import com.iplease.server.ip.manage.infra.message.service.EventSubscribeService
+import com.iplease.server.ip.manage.infra.message.listener.MessageListener
+import com.iplease.server.ip.manage.infra.message.service.MessagePublishService
+import com.iplease.server.ip.manage.infra.message.service.MessageSubscribeService
 import org.springframework.amqp.core.Message
 import reactor.kotlin.core.publisher.toMono
 
-class IpReleasedEventListener(
+class IpReleasedMessageListener(
     private val ipReleaseEventHandler: IpReleaseEventHandler,
-    private val eventPublishService: EventPublishService,
-    eventSubscribeService: EventSubscribeService
-): EventListener {
+    private val messagePublishService: MessagePublishService,
+    messageSubscribeService: MessageSubscribeService
+): MessageListener {
     init {
-        eventSubscribeService.addListener(this)
+        messageSubscribeService.addListener(this)
     }
 
     override fun handle(message: Message) {
@@ -29,7 +29,7 @@ class IpReleasedEventListener(
             .toMono()
             .map { it.readValue(message.body, IpReleasedEvent::class.java) }
             .onErrorContinue{_, _ ->
-                eventPublishService.publish(
+                messagePublishService.publish(
                     Error.WRONG_PAYLOAD.routingKey,
                     WrongPayloadError(Event.IP_RELEASED, message.body.toString())
                 )

@@ -2,8 +2,8 @@ package com.iplease.server.ip.manage.domain.release.listener
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.iplease.server.ip.manage.domain.release.service.IpReleaseService
-import com.iplease.server.ip.manage.infra.event.data.dto.IpReleasedError
+import com.iplease.server.ip.manage.domain.release.handler.IpReleaseEventHandler
+import com.iplease.server.ip.manage.global.common.data.dto.ReleasedIpDto
 import com.iplease.server.ip.manage.infra.event.data.type.Event
 import com.iplease.server.ip.manage.infra.event.service.EventPublishService
 import com.iplease.server.ip.manage.infra.event.service.EventSubscribeService
@@ -16,22 +16,25 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.core.MessageProperties
-import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
 class IpReleasedEventListenerTest {
-    private lateinit var ipReleaseService: IpReleaseService
+    private lateinit var ipReleaseEventHandler: IpReleaseEventHandler
     private lateinit var eventPublishService: EventPublishService
     private lateinit var eventSubscribeService: EventSubscribeService
     private lateinit var target: IpReleasedEventListener
-    private lateinit var messageProperties: MessageProperties
-    private lateinit var message: Message
+
     private var assignedIpUuid by Delegates.notNull<Long>()
     private var issuerUuid by Delegates.notNull<Long>()
+
     private lateinit var event: IpReleasedEvent
     private lateinit var eventByte: ByteArray
+    private lateinit var releasedIpDto: ReleasedIpDto
+
+    private lateinit var messageProperties: MessageProperties
+    private lateinit var message: Message
 
     @BeforeEach
     fun setUp() {
@@ -42,13 +45,14 @@ class IpReleasedEventListenerTest {
             .registerKotlinModule()
             .writeValueAsString(event)
             .toByteArray()
-        ipReleaseService = mock()
+        releasedIpDto = ReleasedIpDto(assignedIpUuid, issuerUuid)
+        ipReleaseEventHandler = mock()
         eventPublishService = mock()
         eventSubscribeService = mock()
-        target = IpReleasedEventListener(ipReleaseService, eventPublishService, eventSubscribeService)
+        target = IpReleasedEventListener(ipReleaseEventHandler, eventPublishService, eventSubscribeService)
 
-        messageProperties = mock()
         message = mock()
+        messageProperties = mock()
     }
 
     //성공적으로 Service 단에 할당해제로직을 위임하는지 테스트한다.
@@ -57,27 +61,11 @@ class IpReleasedEventListenerTest {
         whenever(messageProperties.receivedRoutingKey).thenReturn(Event.IP_RELEASED.routingKey)
         whenever(message.messageProperties).thenReturn(messageProperties)
         whenever(message.body).thenReturn(eventByte)
-        whenever(ipReleaseService.release(assignedIpUuid)).thenReturn(Unit.toMono())
+        whenever(ipReleaseEventHandler.handle(releasedIpDto)).thenReturn(releasedIpDto.toMono())
 
         target.handle(message)
-        verify(ipReleaseService, times(1)).release(assignedIpUuid)
+        verify(ipReleaseEventHandler, times(1)).handle(any())
         verify(eventPublishService, never()).publish(any(), any())
-    }
-
-    //만약 Service 단에서 에외 발생시 IpReleaseError 를 전파하는지 테스트한다
-    @Test @DisplayName("이벤트 구독 - 위임한 로직에서 예외가 발생할 경우")
-    fun subscribeExceptionOccurred() {
-        val throwable = java.lang.RuntimeException(Random.nextLong().toString())
-        val error = IpReleasedError(assignedIpUuid, issuerUuid, throwable)
-
-        whenever(messageProperties.receivedRoutingKey).thenReturn(Event.IP_RELEASED.routingKey)
-        whenever(message.messageProperties).thenReturn(messageProperties)
-        whenever(message.body).thenReturn(eventByte)
-        whenever(ipReleaseService.release(assignedIpUuid)).thenReturn(Mono.error(throwable))
-
-        target.handle(message)
-        verify(ipReleaseService, times(1)).release(assignedIpUuid)
-        verify(eventPublishService, times(1)).publish(Error.IP_RELEASED.routingKey, error)
     }
 
     //RoutingKey 가 IpRelease 가 아닐경우 어떠한 처리없이 로직을 종료하는지 테스트한다.
@@ -86,10 +74,9 @@ class IpReleasedEventListenerTest {
         whenever(messageProperties.receivedRoutingKey).thenReturn(Event.values().filter{ it != Event.IP_RELEASED }.random().routingKey)
         whenever(message.messageProperties).thenReturn(messageProperties)
         whenever(message.body).thenReturn(eventByte)
-        whenever(ipReleaseService.release(assignedIpUuid)).thenReturn(Unit.toMono())
 
         target.handle(message)
-        verify(ipReleaseService, never()).release(any())
+        verify(ipReleaseEventHandler, never()).handle(any())
         verify(eventPublishService, never()).publish(any(), any())
     }
 
@@ -100,10 +87,9 @@ class IpReleasedEventListenerTest {
         whenever(messageProperties.receivedRoutingKey).thenReturn(Event.IP_RELEASED.routingKey)
         whenever(message.messageProperties).thenReturn(messageProperties)
         whenever(message.body).thenReturn(eventStr.toByteArray())
-        whenever(ipReleaseService.release(assignedIpUuid)).thenReturn(Unit.toMono())
 
         target.handle(message)
-        verify(ipReleaseService, never()).release(any())
+        verify(ipReleaseEventHandler, never()).handle(any())
         verify(eventPublishService, times(1)).publish(
             Error.WRONG_PAYLOAD.routingKey,
             WrongPayloadError(Event.IP_RELEASED, message.body.toString())

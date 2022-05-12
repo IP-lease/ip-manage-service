@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.core.MessageProperties
+import reactor.kotlin.core.publisher.toMono
 import java.time.LocalDate
 import kotlin.properties.Delegates
 import kotlin.random.Random
@@ -78,6 +79,7 @@ class IpAssignedEventListenerTest {
         whenever(messageProperties.receivedRoutingKey).thenReturn(Event.IP_ASSIGNED.routingKey)
         whenever(message.messageProperties).thenReturn(messageProperties)
         whenever(message.body).thenReturn(eventStr.toByteArray())
+        whenever(ipAssignedEventHandler.handle(assignedIpDto)).thenReturn(assignedIpDto.toMono())
 
         target.handle(message)
         verify(ipAssignedEventHandler, times(1)).handle(assignedIpDto.copy(uuid = 0))

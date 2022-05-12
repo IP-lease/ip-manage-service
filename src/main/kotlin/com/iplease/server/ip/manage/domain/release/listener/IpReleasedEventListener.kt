@@ -2,8 +2,7 @@ package com.iplease.server.ip.manage.domain.release.listener
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.iplease.server.ip.manage.domain.release.service.IpReleaseService
-import com.iplease.server.ip.manage.infra.event.data.dto.IpReleasedError
+import com.iplease.server.ip.manage.domain.release.handler.IpReleaseEventHandler
 import com.iplease.server.ip.manage.infra.event.data.dto.IpReleasedEvent
 import com.iplease.server.ip.manage.infra.event.data.dto.WrongPayloadError
 import com.iplease.server.ip.manage.infra.event.data.type.Error
@@ -12,9 +11,10 @@ import com.iplease.server.ip.manage.infra.event.listener.EventListener
 import com.iplease.server.ip.manage.infra.event.service.EventPublishService
 import com.iplease.server.ip.manage.infra.event.service.EventSubscribeService
 import org.springframework.amqp.core.Message
+import reactor.kotlin.core.publisher.toMono
 
 class IpReleasedEventListener(
-    private val ipReleaseService: IpReleaseService,
+    private val ipReleaseEventHandler: IpReleaseEventHandler,
     private val eventPublishService: EventPublishService,
     eventSubscribeService: EventSubscribeService
 ): EventListener {
@@ -26,20 +26,15 @@ class IpReleasedEventListener(
         if (message.messageProperties.receivedRoutingKey != Event.IP_RELEASED.routingKey) return
         ObjectMapper()
             .registerKotlinModule()
-            .runCatching { readValue(message.body, IpReleasedEvent::class.java) }
-            .onFailure { eventPublishService.publish(
-                Error.WRONG_PAYLOAD.routingKey,
-                WrongPayloadError(Event.IP_RELEASED, message.body.toString())
-            ) }
-            .onSuccess { release(it) }
-    }
-
-    private fun release(event: IpReleasedEvent) {
-        ipReleaseService.release(event.assignedIpUuid)
-            .doOnError { eventPublishService.publish(Error.IP_RELEASED.routingKey, event.error(it)) }
-            .onErrorReturn(Unit)
+            .toMono()
+            .map { it.readValue(message.body, IpReleasedEvent::class.java) }
+            .doOnError {
+                eventPublishService.publish(
+                    Error.WRONG_PAYLOAD.routingKey,
+                    WrongPayloadError(Event.IP_RELEASED, message.body.toString())
+                )
+            }.map { it.toDto()}
+            .flatMap { ipReleaseEventHandler.handle(it) }
             .block()
     }
-
-    private fun IpReleasedEvent.error(it: Throwable) = IpReleasedError(assignedIpUuid, issuerUuid, it)
 }

@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.domain.assign.listener
+package com.iplease.server.ip.manage.domain.assign.subscriber
 
 import com.iplease.server.ip.manage.domain.assign.handler.IpAssignedEventHandler
 import com.iplease.server.ip.manage.infra.message.data.dto.IpAssignedEvent

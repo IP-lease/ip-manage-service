@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.infra.log.listener
+package com.iplease.server.ip.manage.infra.log.subscriber
 
 import com.iplease.server.ip.manage.infra.message.listener.MessageSubscriber
 import com.iplease.server.ip.manage.infra.message.service.subscribe.MessageSubscribeService

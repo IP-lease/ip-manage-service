@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.domain.assign.listener
+package com.iplease.server.ip.manage.domain.assign.subscriber
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule

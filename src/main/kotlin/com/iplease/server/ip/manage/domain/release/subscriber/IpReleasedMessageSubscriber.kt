@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.domain.release.listener
+package com.iplease.server.ip.manage.domain.release.subscriber
 
 import com.iplease.server.ip.manage.domain.release.handler.IpReleaseEventHandler
 import com.iplease.server.ip.manage.infra.message.data.dto.IpReleasedEvent

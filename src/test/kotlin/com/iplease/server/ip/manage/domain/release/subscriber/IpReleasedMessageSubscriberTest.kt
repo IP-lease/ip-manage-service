@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.domain.release.listener
+package com.iplease.server.ip.manage.domain.release.subscriber
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule

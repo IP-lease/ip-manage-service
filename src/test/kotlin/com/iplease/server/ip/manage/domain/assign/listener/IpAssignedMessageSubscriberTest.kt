@@ -6,12 +6,12 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.iplease.server.ip.manage.domain.assign.handler.IpAssignedEventHandler
 import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
 import com.iplease.server.ip.manage.global.common.data.dto.IpDto
-import com.iplease.server.ip.manage.infra.event.data.dto.IpAssignedEvent
-import com.iplease.server.ip.manage.infra.event.data.dto.WrongPayloadError
-import com.iplease.server.ip.manage.infra.event.service.EventPublishService
-import com.iplease.server.ip.manage.infra.event.service.EventSubscribeService
-import com.iplease.server.ip.manage.infra.event.data.type.Error
-import com.iplease.server.ip.manage.infra.event.data.type.Event
+import com.iplease.server.ip.manage.infra.message.data.dto.IpAssignedEvent
+import com.iplease.server.ip.manage.infra.message.data.dto.WrongPayloadError
+import com.iplease.server.ip.manage.infra.message.service.subscribe.MessageSubscribeService
+import com.iplease.server.ip.manage.infra.message.data.type.Error
+import com.iplease.server.ip.manage.infra.message.data.type.Event
+import com.iplease.server.ip.manage.infra.message.service.publish.MessagePublishServiceFacade
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -23,11 +23,11 @@ import java.time.LocalDate
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
-class IpAssignedEventListenerTest {
+class IpAssignedMessageSubscriberTest {
     private lateinit var ipAssignedEventHandler: IpAssignedEventHandler
-    private lateinit var eventSubscribeService: EventSubscribeService
-    private lateinit var eventPublishService: EventPublishService
-    private lateinit var target: IpAssignedEventListener
+    private lateinit var messageSubscribeService: MessageSubscribeService
+    private lateinit var messagePublishService: MessagePublishServiceFacade
+    private lateinit var target: IpAssignedMessageSubscriber
 
     private var assignedIpUuid by Delegates.notNull<Long>()
     private var issuerUuid by Delegates.notNull<Long>()
@@ -52,10 +52,10 @@ class IpAssignedEventListenerTest {
         expireAt = LocalDate.now().withDayOfYear((2..365).random())
         ip = (1..4).map { (0..255).random() }
         ipAssignedEventHandler = mock()
-        eventSubscribeService = mock()
-        eventPublishService = mock()
+        messageSubscribeService = mock()
+        messagePublishService = mock()
 
-        target = IpAssignedEventListener(ipAssignedEventHandler, eventPublishService, eventSubscribeService)
+        target = IpAssignedMessageSubscriber(ipAssignedEventHandler, messagePublishService, messageSubscribeService)
         ipDto = IpDto(ip[0], ip[1], ip[2], ip[3])
         assignedIpDto = AssignedIpDto(assignedIpUuid, issuerUuid, assignerUuid, assignedAt, expireAt, ipDto)
         event = IpAssignedEvent(
@@ -81,9 +81,9 @@ class IpAssignedEventListenerTest {
         whenever(message.body).thenReturn(eventStr.toByteArray())
         whenever(ipAssignedEventHandler.handle(eq(assignedIpDto.copy(uuid = 0)), any())).thenReturn(assignedIpDto.toMono())
 
-        target.handle(message)
+        target.subscribe(message)
         verify(ipAssignedEventHandler, times(1)).handle(eq(assignedIpDto.copy(uuid = 0)), any())
-        verify(eventPublishService, never()).publish(any(), any())
+        verify(messagePublishService, never()).publishError(any<Error>(), any())
     }
 
     @Test @DisplayName("이벤트 구독 - 잘못된 이벤트를 구독하였을 경우")
@@ -93,11 +93,8 @@ class IpAssignedEventListenerTest {
         whenever(message.messageProperties).thenReturn(messageProperties)
         whenever(message.body).thenReturn(eventStr.toByteArray())
 
-        target.handle(message)
+        target.subscribe(message)
         verify(ipAssignedEventHandler, never()).handle(eq(assignedIpDto), any())
-        verify(eventPublishService, times(1)).publish(
-            Error.WRONG_PAYLOAD.routingKey,
-            WrongPayloadError(Event.IP_ASSIGNED, message.body.toString())
-        )
+        verify(messagePublishService, times(1)).publishError(Error.WRONG_PAYLOAD, WrongPayloadError(Event.IP_ASSIGNED, message.body.toString()))
     }
 }

@@ -1,5 +1,6 @@
-package com.iplease.server.ip.manage.infra.event.data.dto
+package com.iplease.server.ip.manage.infra.message.data.dto
 
+import com.iplease.server.ip.manage.infra.message.data.ErrorData
 import java.time.LocalDate
 
 data class IpAssignedError(
@@ -12,4 +13,4 @@ data class IpAssignedError(
     val ipThird: Int,
     val ipFourth: Int,
     val throwable: Throwable
-)
+): ErrorData

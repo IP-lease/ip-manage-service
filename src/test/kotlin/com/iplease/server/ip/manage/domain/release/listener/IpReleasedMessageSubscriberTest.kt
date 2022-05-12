@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.iplease.server.ip.manage.domain.release.handler.IpReleaseEventHandler
 import com.iplease.server.ip.manage.global.common.data.dto.ReleasedIpDto
-import com.iplease.server.ip.manage.infra.event.data.type.Event
-import com.iplease.server.ip.manage.infra.event.service.EventPublishService
-import com.iplease.server.ip.manage.infra.event.service.EventSubscribeService
-import com.iplease.server.ip.manage.infra.event.data.dto.IpReleasedEvent
-import com.iplease.server.ip.manage.infra.event.data.dto.WrongPayloadError
-import com.iplease.server.ip.manage.infra.event.data.type.Error
+import com.iplease.server.ip.manage.infra.message.data.type.Event
+import com.iplease.server.ip.manage.infra.message.service.subscribe.MessageSubscribeService
+import com.iplease.server.ip.manage.infra.message.data.dto.IpReleasedEvent
+import com.iplease.server.ip.manage.infra.message.data.dto.WrongPayloadError
+import com.iplease.server.ip.manage.infra.message.data.type.Error
+import com.iplease.server.ip.manage.infra.message.service.publish.MessagePublishServiceFacade
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -20,11 +20,11 @@ import reactor.kotlin.core.publisher.toMono
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
-class IpReleasedEventListenerTest {
+class IpReleasedMessageSubscriberTest {
     private lateinit var ipReleaseEventHandler: IpReleaseEventHandler
-    private lateinit var eventPublishService: EventPublishService
-    private lateinit var eventSubscribeService: EventSubscribeService
-    private lateinit var target: IpReleasedEventListener
+    private lateinit var messagePublishService: MessagePublishServiceFacade
+    private lateinit var messageSubscribeService: MessageSubscribeService
+    private lateinit var target: IpReleasedMessageSubscriber
 
     private var assignedIpUuid by Delegates.notNull<Long>()
     private var issuerUuid by Delegates.notNull<Long>()
@@ -47,9 +47,9 @@ class IpReleasedEventListenerTest {
             .toByteArray()
         releasedIpDto = ReleasedIpDto(assignedIpUuid, issuerUuid)
         ipReleaseEventHandler = mock()
-        eventPublishService = mock()
-        eventSubscribeService = mock()
-        target = IpReleasedEventListener(ipReleaseEventHandler, eventPublishService, eventSubscribeService)
+        messagePublishService = mock()
+        messageSubscribeService = mock()
+        target = IpReleasedMessageSubscriber(ipReleaseEventHandler, messagePublishService, messageSubscribeService)
 
         message = mock()
         messageProperties = mock()
@@ -63,21 +63,9 @@ class IpReleasedEventListenerTest {
         whenever(message.body).thenReturn(eventByte)
         whenever(ipReleaseEventHandler.handle(releasedIpDto, Unit)).thenReturn(Unit.toMono())
 
-        target.handle(message)
+        target.subscribe(message)
         verify(ipReleaseEventHandler, times(1)).handle(releasedIpDto, Unit)
-        verify(eventPublishService, never()).publish(any(), any())
-    }
-
-    //RoutingKey 가 IpRelease 가 아닐경우 어떠한 처리없이 로직을 종료하는지 테스트한다.
-    @Test @DisplayName("이벤트 구독 - 이벤트가 구독 대상이 아닐경우")
-    fun subscribeUnsupportedRoutingKey() {
-        whenever(messageProperties.receivedRoutingKey).thenReturn(Event.values().filter{ it != Event.IP_RELEASED }.random().routingKey)
-        whenever(message.messageProperties).thenReturn(messageProperties)
-        whenever(message.body).thenReturn(eventByte)
-
-        target.handle(message)
-        verify(ipReleaseEventHandler, never()).handle(any(), any())
-        verify(eventPublishService, never()).publish(any(), any())
+        verify(messagePublishService, never()).publishError(any<Error>(), any())
     }
 
     //만약 메세지의 페이로드(EventData) 가 올바르지 않을 경우, IpReleaseError 를 전파하는지 테스트한다
@@ -88,11 +76,8 @@ class IpReleasedEventListenerTest {
         whenever(message.messageProperties).thenReturn(messageProperties)
         whenever(message.body).thenReturn(eventStr.toByteArray())
 
-        target.handle(message)
+        target.subscribe(message)
         verify(ipReleaseEventHandler, never()).handle(any(), any())
-        verify(eventPublishService, times(1)).publish(
-            Error.WRONG_PAYLOAD.routingKey,
-            WrongPayloadError(Event.IP_RELEASED, message.body.toString())
-        )
+        verify(messagePublishService, times(1)).publishError(Error.WRONG_PAYLOAD, WrongPayloadError(Event.IP_RELEASED, message.body.toString()))
     }
 }

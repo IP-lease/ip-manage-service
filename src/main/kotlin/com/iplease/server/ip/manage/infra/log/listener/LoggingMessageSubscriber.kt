@@ -14,9 +14,7 @@ class LoggingMessageSubscriber(
     messageSubscribeService: MessageSubscribeService,
     private val loggingService: LoggingService
 ): MessageSubscriber {
-    init {
-        messageSubscribeService.addListener(this)
-    }
+    init { messageSubscribeService.addListener(this) }
     override fun subscribe(message: Message) {
         loggingService.withLog(
             EventSubscribeInput(message.messageProperties.receivedRoutingKey, message.body!!.toString(Charsets.UTF_8)),

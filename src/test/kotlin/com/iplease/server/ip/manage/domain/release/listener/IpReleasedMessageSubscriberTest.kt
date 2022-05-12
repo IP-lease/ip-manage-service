@@ -68,18 +68,6 @@ class IpReleasedMessageSubscriberTest {
         verify(messagePublishService, never()).publishError(any<Error>(), any())
     }
 
-    //RoutingKey 가 IpRelease 가 아닐경우 어떠한 처리없이 로직을 종료하는지 테스트한다.
-    @Test @DisplayName("이벤트 구독 - 이벤트가 구독 대상이 아닐경우")
-    fun subscribeUnsupportedRoutingKey() {
-        whenever(messageProperties.receivedRoutingKey).thenReturn(Event.values().filter{ it != Event.IP_RELEASED }.random().routingKey)
-        whenever(message.messageProperties).thenReturn(messageProperties)
-        whenever(message.body).thenReturn(eventByte)
-
-        target.subscribe(message)
-        verify(ipReleaseEventHandler, never()).handle(any(), any())
-        verify(messagePublishService, never()).publishError(any<Error>(), any())
-    }
-
     //만약 메세지의 페이로드(EventData) 가 올바르지 않을 경우, IpReleaseError 를 전파하는지 테스트한다
     @Test @DisplayName("이벤트 구독 - 잘못된 이벤트를 구독하였을 경우")
     fun subscribeMalformedPayload() {

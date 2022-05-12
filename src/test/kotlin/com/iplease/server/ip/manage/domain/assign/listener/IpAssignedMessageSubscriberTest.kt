@@ -8,10 +8,10 @@ import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
 import com.iplease.server.ip.manage.global.common.data.dto.IpDto
 import com.iplease.server.ip.manage.infra.message.data.dto.IpAssignedEvent
 import com.iplease.server.ip.manage.infra.message.data.dto.WrongPayloadError
-import com.iplease.server.ip.manage.infra.message.service.MessagePublishService
-import com.iplease.server.ip.manage.infra.message.service.MessageSubscribeService
+import com.iplease.server.ip.manage.infra.message.service.subscribe.MessageSubscribeService
 import com.iplease.server.ip.manage.infra.message.data.type.Error
 import com.iplease.server.ip.manage.infra.message.data.type.Event
+import com.iplease.server.ip.manage.infra.message.service.publish.MessagePublishServiceFacade
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -26,7 +26,7 @@ import kotlin.random.Random
 class IpAssignedMessageSubscriberTest {
     private lateinit var ipAssignedEventHandler: IpAssignedEventHandler
     private lateinit var messageSubscribeService: MessageSubscribeService
-    private lateinit var messagePublishService: MessagePublishService
+    private lateinit var messagePublishService: MessagePublishServiceFacade
     private lateinit var target: IpAssignedMessageSubscriber
 
     private var assignedIpUuid by Delegates.notNull<Long>()
@@ -83,7 +83,7 @@ class IpAssignedMessageSubscriberTest {
 
         target.subscribe(message)
         verify(ipAssignedEventHandler, times(1)).handle(eq(assignedIpDto.copy(uuid = 0)), any())
-        verify(messagePublishService, never()).publish(any<Error>(), any())
+        verify(messagePublishService, never()).publishError(any<Error>(), any())
     }
 
     @Test @DisplayName("이벤트 구독 - 잘못된 이벤트를 구독하였을 경우")
@@ -95,9 +95,6 @@ class IpAssignedMessageSubscriberTest {
 
         target.subscribe(message)
         verify(ipAssignedEventHandler, never()).handle(eq(assignedIpDto), any())
-        verify(messagePublishService, times(1)).publish(
-            Error.WRONG_PAYLOAD,
-            WrongPayloadError(Event.IP_ASSIGNED, message.body.toString())
-        )
+        verify(messagePublishService, times(1)).publishError(Error.WRONG_PAYLOAD, WrongPayloadError(Event.IP_ASSIGNED, message.body.toString()))
     }
 }

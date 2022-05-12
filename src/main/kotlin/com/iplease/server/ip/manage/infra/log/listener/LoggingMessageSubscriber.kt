@@ -1,7 +1,7 @@
 package com.iplease.server.ip.manage.infra.log.listener
 
 import com.iplease.server.ip.manage.infra.message.listener.MessageSubscriber
-import com.iplease.server.ip.manage.infra.message.service.MessageSubscribeService
+import com.iplease.server.ip.manage.infra.message.service.subscribe.MessageSubscribeService
 import com.iplease.server.ip.manage.infra.log.service.LoggingService
 import com.iplease.server.ip.manage.infra.log.type.LoggerType
 import com.iplease.server.ip.manage.infra.log.util.EventSubscribeInput

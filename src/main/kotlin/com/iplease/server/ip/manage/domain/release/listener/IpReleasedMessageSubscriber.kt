@@ -8,14 +8,14 @@ import com.iplease.server.ip.manage.infra.message.data.dto.WrongPayloadError
 import com.iplease.server.ip.manage.infra.message.data.type.Error
 import com.iplease.server.ip.manage.infra.message.data.type.Event
 import com.iplease.server.ip.manage.infra.message.listener.MessageSubscriber
-import com.iplease.server.ip.manage.infra.message.service.MessagePublishService
-import com.iplease.server.ip.manage.infra.message.service.MessageSubscribeService
+import com.iplease.server.ip.manage.infra.message.service.publish.MessagePublishServiceFacade
+import com.iplease.server.ip.manage.infra.message.service.subscribe.MessageSubscribeService
 import org.springframework.amqp.core.Message
 import reactor.kotlin.core.publisher.toMono
 
 class IpReleasedMessageSubscriber(
     private val ipReleaseEventHandler: IpReleaseEventHandler,
-    private val messagePublishService: MessagePublishService,
+    private val messagePublishService: MessagePublishServiceFacade,
     messageSubscribeService: MessageSubscribeService
 ): MessageSubscriber {
     init {
@@ -29,7 +29,7 @@ class IpReleasedMessageSubscriber(
             .toMono()
             .map { it.readValue(message.body, IpReleasedEvent::class.java) }
             .onErrorContinue{_, _ ->
-                messagePublishService.publish(
+                messagePublishService.publishError(
                     Error.WRONG_PAYLOAD,
                     WrongPayloadError(Event.IP_RELEASED, message.body.toString())
                 )

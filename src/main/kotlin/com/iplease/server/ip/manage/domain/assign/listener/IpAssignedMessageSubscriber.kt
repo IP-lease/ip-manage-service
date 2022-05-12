@@ -8,9 +8,9 @@ import com.iplease.server.ip.manage.infra.message.data.dto.IpAssignedEvent
 import com.iplease.server.ip.manage.infra.message.data.dto.WrongPayloadError
 import com.iplease.server.ip.manage.infra.message.data.type.Error
 import com.iplease.server.ip.manage.infra.message.listener.MessageSubscriber
-import com.iplease.server.ip.manage.infra.message.service.MessageSubscribeService
+import com.iplease.server.ip.manage.infra.message.service.subscribe.MessageSubscribeService
 import com.iplease.server.ip.manage.infra.message.data.type.Event
-import com.iplease.server.ip.manage.infra.message.service.MessagePublishService
+import com.iplease.server.ip.manage.infra.message.service.publish.MessagePublishServiceFacade
 import org.springframework.amqp.core.Message
 import org.springframework.stereotype.Component
 import reactor.kotlin.core.publisher.toMono
@@ -18,7 +18,7 @@ import reactor.kotlin.core.publisher.toMono
 @Component
 class IpAssignedMessageSubscriber(
     private val ipAssignedEventHandler: IpAssignedEventHandler,
-    private val messagePublishService: MessagePublishService,
+    private val messagePublishService: MessagePublishServiceFacade,
     messageSubscribeService: MessageSubscribeService
 ): MessageSubscriber {
     init { messageSubscribeService.addListener(this) }
@@ -31,10 +31,7 @@ class IpAssignedMessageSubscriber(
             .toMono()
             .map{ it.readValue(message.body, IpAssignedEvent::class.java) }
             .onErrorContinue {_, _ ->
-                messagePublishService.publish(
-                    Error.WRONG_PAYLOAD,
-                    WrongPayloadError(Event.IP_ASSIGNED, message.body.toString())
-                )
+                messagePublishService.publishError(Error.WRONG_PAYLOAD, WrongPayloadError(Event.IP_ASSIGNED, message.body.toString()))
             }.map{ it.toDto() }
             .flatMap { ipAssignedEventHandler.handle(it, it) }
             .block()

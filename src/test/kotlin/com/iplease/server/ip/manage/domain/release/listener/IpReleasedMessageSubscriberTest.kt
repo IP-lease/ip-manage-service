@@ -5,11 +5,11 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.iplease.server.ip.manage.domain.release.handler.IpReleaseEventHandler
 import com.iplease.server.ip.manage.global.common.data.dto.ReleasedIpDto
 import com.iplease.server.ip.manage.infra.message.data.type.Event
-import com.iplease.server.ip.manage.infra.message.service.MessagePublishService
-import com.iplease.server.ip.manage.infra.message.service.MessageSubscribeService
+import com.iplease.server.ip.manage.infra.message.service.subscribe.MessageSubscribeService
 import com.iplease.server.ip.manage.infra.message.data.dto.IpReleasedEvent
 import com.iplease.server.ip.manage.infra.message.data.dto.WrongPayloadError
 import com.iplease.server.ip.manage.infra.message.data.type.Error
+import com.iplease.server.ip.manage.infra.message.service.publish.MessagePublishServiceFacade
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -22,7 +22,7 @@ import kotlin.random.Random
 
 class IpReleasedMessageSubscriberTest {
     private lateinit var ipReleaseEventHandler: IpReleaseEventHandler
-    private lateinit var messagePublishService: MessagePublishService
+    private lateinit var messagePublishService: MessagePublishServiceFacade
     private lateinit var messageSubscribeService: MessageSubscribeService
     private lateinit var target: IpReleasedMessageSubscriber
 
@@ -65,7 +65,7 @@ class IpReleasedMessageSubscriberTest {
 
         target.subscribe(message)
         verify(ipReleaseEventHandler, times(1)).handle(releasedIpDto, Unit)
-        verify(messagePublishService, never()).publish(any<Error>(), any())
+        verify(messagePublishService, never()).publishError(any<Error>(), any())
     }
 
     //RoutingKey 가 IpRelease 가 아닐경우 어떠한 처리없이 로직을 종료하는지 테스트한다.
@@ -77,7 +77,7 @@ class IpReleasedMessageSubscriberTest {
 
         target.subscribe(message)
         verify(ipReleaseEventHandler, never()).handle(any(), any())
-        verify(messagePublishService, never()).publish(any<Error>(), any())
+        verify(messagePublishService, never()).publishError(any<Error>(), any())
     }
 
     //만약 메세지의 페이로드(EventData) 가 올바르지 않을 경우, IpReleaseError 를 전파하는지 테스트한다
@@ -90,9 +90,6 @@ class IpReleasedMessageSubscriberTest {
 
         target.subscribe(message)
         verify(ipReleaseEventHandler, never()).handle(any(), any())
-        verify(messagePublishService, times(1)).publish(
-            Error.WRONG_PAYLOAD,
-            WrongPayloadError(Event.IP_RELEASED, message.body.toString())
-        )
+        verify(messagePublishService, times(1)).publishError(Error.WRONG_PAYLOAD, WrongPayloadError(Event.IP_RELEASED, message.body.toString()))
     }
 }

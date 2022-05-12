@@ -13,6 +13,7 @@ import com.iplease.server.ip.manage.infra.event.data.type.Event
 import com.iplease.server.ip.manage.infra.event.service.EventPublishService
 import org.springframework.amqp.core.Message
 import org.springframework.stereotype.Component
+import reactor.kotlin.core.publisher.toMono
 
 @Component
 class IpAssignedEventListener(
@@ -24,19 +25,18 @@ class IpAssignedEventListener(
 
     override fun handle(message: Message) {
         if(message.messageProperties.receivedRoutingKey != Event.IP_ASSIGNED.routingKey) return
-        runCatching {
-            ObjectMapper()
-                .registerModule(KotlinModule())
-                .registerModule(JavaTimeModule())
-                .readValue(message.body, IpAssignedEvent::class.java)
-        }.onFailure {
-            eventPublishService.publish(
-                Error.WRONG_PAYLOAD.routingKey,
-                WrongPayloadError(Event.IP_ASSIGNED, message.body.toString())
-            )
-        }.onSuccess {
-            it.toDto()
-            .let (ipAssignedEventHandler::handle)
-        }
+        ObjectMapper()
+            .registerModule(KotlinModule())
+            .registerModule(JavaTimeModule())
+            .toMono()
+            .map{ it.readValue(message.body, IpAssignedEvent::class.java) }
+            .onErrorContinue {_, _ ->
+                eventPublishService.publish(
+                    Error.WRONG_PAYLOAD.routingKey,
+                    WrongPayloadError(Event.IP_ASSIGNED, message.body.toString())
+                )
+            }.map{ it.toDto() }
+            .flatMap { ipAssignedEventHandler.handle(it, it) }
+            .block()
     }
 }

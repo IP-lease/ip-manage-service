@@ -1,15 +1,15 @@
 package com.iplease.server.ip.manage.infra.message.service
 
-import com.iplease.server.ip.manage.infra.message.listener.MessageListener
+import com.iplease.server.ip.manage.infra.message.listener.MessageSubscriber
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Service
 
 @Service
-class RabbitMqMessageSubscribeService: MessageSubscribeService, MessageListener {
-    private val list = mutableSetOf<MessageListener>()
+class RabbitMqMessageSubscribeService: MessageSubscribeService, MessageSubscriber {
+    private val list = mutableSetOf<MessageSubscriber>()
 
     @RabbitListener(queues = ["server.ip.manage"])
-    override fun handle(message: Message) = list.forEach { it.handle(message) }
-    override fun addListener(listener: MessageListener) = list.add(listener).let { }
+    override fun subscribe(message: Message) = list.forEach { it.subscribe(message) }
+    override fun addListener(listener: MessageSubscriber) = list.add(listener).let { }
 }

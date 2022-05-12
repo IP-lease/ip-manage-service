@@ -7,22 +7,22 @@ import com.iplease.server.ip.manage.infra.message.data.dto.IpReleasedEvent
 import com.iplease.server.ip.manage.infra.message.data.dto.WrongPayloadError
 import com.iplease.server.ip.manage.infra.message.data.type.Error
 import com.iplease.server.ip.manage.infra.message.data.type.Event
-import com.iplease.server.ip.manage.infra.message.listener.MessageListener
+import com.iplease.server.ip.manage.infra.message.listener.MessageSubscriber
 import com.iplease.server.ip.manage.infra.message.service.MessagePublishService
 import com.iplease.server.ip.manage.infra.message.service.MessageSubscribeService
 import org.springframework.amqp.core.Message
 import reactor.kotlin.core.publisher.toMono
 
-class IpReleasedMessageListener(
+class IpReleasedMessageSubscriber(
     private val ipReleaseEventHandler: IpReleaseEventHandler,
     private val messagePublishService: MessagePublishService,
     messageSubscribeService: MessageSubscribeService
-): MessageListener {
+): MessageSubscriber {
     init {
         messageSubscribeService.addListener(this)
     }
 
-    override fun handle(message: Message) {
+    override fun subscribe(message: Message) {
         if (message.messageProperties.receivedRoutingKey != Event.IP_RELEASED.routingKey) return
         ObjectMapper()
             .registerKotlinModule()

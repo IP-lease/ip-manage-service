@@ -1,7 +1,7 @@
 package com.iplease.server.ip.manage.infra.message.service
 
-import com.iplease.server.ip.manage.infra.message.listener.MessageListener
+import com.iplease.server.ip.manage.infra.message.listener.MessageSubscriber
 
 interface MessageSubscribeService {
-    fun addListener(listener: MessageListener)
+    fun addListener(listener: MessageSubscriber)
 }

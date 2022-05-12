@@ -23,11 +23,11 @@ import java.time.LocalDate
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
-class IpAssignedMessageListenerTest {
+class IpAssignedMessageSubscriberTest {
     private lateinit var ipAssignedEventHandler: IpAssignedEventHandler
     private lateinit var messageSubscribeService: MessageSubscribeService
     private lateinit var messagePublishService: MessagePublishService
-    private lateinit var target: IpAssignedMessageListener
+    private lateinit var target: IpAssignedMessageSubscriber
 
     private var assignedIpUuid by Delegates.notNull<Long>()
     private var issuerUuid by Delegates.notNull<Long>()
@@ -55,7 +55,7 @@ class IpAssignedMessageListenerTest {
         messageSubscribeService = mock()
         messagePublishService = mock()
 
-        target = IpAssignedMessageListener(ipAssignedEventHandler, messagePublishService, messageSubscribeService)
+        target = IpAssignedMessageSubscriber(ipAssignedEventHandler, messagePublishService, messageSubscribeService)
         ipDto = IpDto(ip[0], ip[1], ip[2], ip[3])
         assignedIpDto = AssignedIpDto(assignedIpUuid, issuerUuid, assignerUuid, assignedAt, expireAt, ipDto)
         event = IpAssignedEvent(
@@ -81,7 +81,7 @@ class IpAssignedMessageListenerTest {
         whenever(message.body).thenReturn(eventStr.toByteArray())
         whenever(ipAssignedEventHandler.handle(eq(assignedIpDto.copy(uuid = 0)), any())).thenReturn(assignedIpDto.toMono())
 
-        target.handle(message)
+        target.subscribe(message)
         verify(ipAssignedEventHandler, times(1)).handle(eq(assignedIpDto.copy(uuid = 0)), any())
         verify(messagePublishService, never()).publish(any(), any())
     }
@@ -93,7 +93,7 @@ class IpAssignedMessageListenerTest {
         whenever(message.messageProperties).thenReturn(messageProperties)
         whenever(message.body).thenReturn(eventStr.toByteArray())
 
-        target.handle(message)
+        target.subscribe(message)
         verify(ipAssignedEventHandler, never()).handle(eq(assignedIpDto), any())
         verify(messagePublishService, times(1)).publish(
             Error.WRONG_PAYLOAD.routingKey,

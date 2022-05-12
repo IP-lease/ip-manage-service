@@ -7,7 +7,7 @@ import com.iplease.server.ip.manage.domain.assign.handler.IpAssignedEventHandler
 import com.iplease.server.ip.manage.infra.message.data.dto.IpAssignedEvent
 import com.iplease.server.ip.manage.infra.message.data.dto.WrongPayloadError
 import com.iplease.server.ip.manage.infra.message.data.type.Error
-import com.iplease.server.ip.manage.infra.message.listener.MessageListener
+import com.iplease.server.ip.manage.infra.message.listener.MessageSubscriber
 import com.iplease.server.ip.manage.infra.message.service.MessageSubscribeService
 import com.iplease.server.ip.manage.infra.message.data.type.Event
 import com.iplease.server.ip.manage.infra.message.service.MessagePublishService
@@ -16,14 +16,14 @@ import org.springframework.stereotype.Component
 import reactor.kotlin.core.publisher.toMono
 
 @Component
-class IpAssignedMessageListener(
+class IpAssignedMessageSubscriber(
     private val ipAssignedEventHandler: IpAssignedEventHandler,
     private val messagePublishService: MessagePublishService,
     messageSubscribeService: MessageSubscribeService
-): MessageListener {
+): MessageSubscriber {
     init { messageSubscribeService.addListener(this) }
 
-    override fun handle(message: Message) {
+    override fun subscribe(message: Message) {
         if(message.messageProperties.receivedRoutingKey != Event.IP_ASSIGNED.routingKey) return
         ObjectMapper()
             .registerModule(KotlinModule())

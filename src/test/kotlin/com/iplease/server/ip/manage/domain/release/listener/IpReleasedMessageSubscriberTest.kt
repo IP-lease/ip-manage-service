@@ -20,11 +20,11 @@ import reactor.kotlin.core.publisher.toMono
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
-class IpReleasedMessageListenerTest {
+class IpReleasedMessageSubscriberTest {
     private lateinit var ipReleaseEventHandler: IpReleaseEventHandler
     private lateinit var messagePublishService: MessagePublishService
     private lateinit var messageSubscribeService: MessageSubscribeService
-    private lateinit var target: IpReleasedMessageListener
+    private lateinit var target: IpReleasedMessageSubscriber
 
     private var assignedIpUuid by Delegates.notNull<Long>()
     private var issuerUuid by Delegates.notNull<Long>()
@@ -49,7 +49,7 @@ class IpReleasedMessageListenerTest {
         ipReleaseEventHandler = mock()
         messagePublishService = mock()
         messageSubscribeService = mock()
-        target = IpReleasedMessageListener(ipReleaseEventHandler, messagePublishService, messageSubscribeService)
+        target = IpReleasedMessageSubscriber(ipReleaseEventHandler, messagePublishService, messageSubscribeService)
 
         message = mock()
         messageProperties = mock()
@@ -63,7 +63,7 @@ class IpReleasedMessageListenerTest {
         whenever(message.body).thenReturn(eventByte)
         whenever(ipReleaseEventHandler.handle(releasedIpDto, Unit)).thenReturn(Unit.toMono())
 
-        target.handle(message)
+        target.subscribe(message)
         verify(ipReleaseEventHandler, times(1)).handle(releasedIpDto, Unit)
         verify(messagePublishService, never()).publish(any(), any())
     }
@@ -75,7 +75,7 @@ class IpReleasedMessageListenerTest {
         whenever(message.messageProperties).thenReturn(messageProperties)
         whenever(message.body).thenReturn(eventByte)
 
-        target.handle(message)
+        target.subscribe(message)
         verify(ipReleaseEventHandler, never()).handle(any(), any())
         verify(messagePublishService, never()).publish(any(), any())
     }
@@ -88,7 +88,7 @@ class IpReleasedMessageListenerTest {
         whenever(message.messageProperties).thenReturn(messageProperties)
         whenever(message.body).thenReturn(eventStr.toByteArray())
 
-        target.handle(message)
+        target.subscribe(message)
         verify(ipReleaseEventHandler, never()).handle(any(), any())
         verify(messagePublishService, times(1)).publish(
             Error.WRONG_PAYLOAD.routingKey,

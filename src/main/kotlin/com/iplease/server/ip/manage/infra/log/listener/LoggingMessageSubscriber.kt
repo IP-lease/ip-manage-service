@@ -1,6 +1,6 @@
 package com.iplease.server.ip.manage.infra.log.listener
 
-import com.iplease.server.ip.manage.infra.message.listener.MessageListener
+import com.iplease.server.ip.manage.infra.message.listener.MessageSubscriber
 import com.iplease.server.ip.manage.infra.message.service.MessageSubscribeService
 import com.iplease.server.ip.manage.infra.log.service.LoggingService
 import com.iplease.server.ip.manage.infra.log.type.LoggerType
@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component
 import reactor.kotlin.core.publisher.toMono
 
 @Component
-class LoggingMessageListener(
+class LoggingMessageSubscriber(
     messageSubscribeService: MessageSubscribeService,
     private val loggingService: LoggingService
-): MessageListener {
+): MessageSubscriber {
     init {
         messageSubscribeService.addListener(this)
     }
-    override fun handle(message: Message) {
+    override fun subscribe(message: Message) {
         loggingService.withLog(
             EventSubscribeInput(message.messageProperties.receivedRoutingKey, message.body!!.toString(Charsets.UTF_8)),
             Unit.toMono(),

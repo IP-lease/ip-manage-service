@@ -26,7 +26,7 @@ class IpAssignServiceImpl(
             .map { AssignedIpTable(0L, it.issuerUuid, it.assignerUuid, it.assignedAt, it.expireAt, it.ip.first, it.ip.second, it.ip.third, it.ip.fourth) }
             .flatMap { assignedIpRepository.save(it) }
             .map { AssignedIpDto(it.uuid, it.issuerUuid, it.assignerUuid, it.assignedAt, it.expireAt, IpDto(it.ipFirst, it.ipSecond, it.ipThird, it.ipFourth)) }
-            .let { loggingService.withLog(assignedIpDto, it, LoggerType.IP_ASSIGN_LOGGER) }
+            .let { loggingService.withLog(assignedIpDto, it, LoggerType.IP_ASSIGN_SERVICE_LOGGER) }
 
     private fun checkIpAddress(dto: IpDto): Mono<Any> =
         existsByIp(dto)

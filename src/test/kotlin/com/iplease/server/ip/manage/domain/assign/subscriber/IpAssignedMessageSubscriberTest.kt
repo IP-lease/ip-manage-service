@@ -1,4 +1,4 @@
-package com.iplease.server.ip.manage.domain.assign.listener
+package com.iplease.server.ip.manage.domain.assign.subscriber
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.iplease.server.ip.manage.domain.assign.handler.IpAssignedEventHandler
 import com.iplease.server.ip.manage.global.common.data.dto.AssignedIpDto
 import com.iplease.server.ip.manage.global.common.data.dto.IpDto
+import com.iplease.server.ip.manage.infra.log.service.LoggingService
 import com.iplease.server.ip.manage.infra.message.data.dto.IpAssignedEvent
 import com.iplease.server.ip.manage.infra.message.data.dto.WrongPayloadError
 import com.iplease.server.ip.manage.infra.message.service.subscribe.MessageSubscribeService
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.core.MessageProperties
+import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.time.LocalDate
 import kotlin.properties.Delegates
@@ -25,6 +27,7 @@ import kotlin.random.Random
 
 class IpAssignedMessageSubscriberTest {
     private lateinit var ipAssignedEventHandler: IpAssignedEventHandler
+    private lateinit var loggingService: LoggingService
     private lateinit var messageSubscribeService: MessageSubscribeService
     private lateinit var messagePublishService: MessagePublishServiceFacade
     private lateinit var target: IpAssignedMessageSubscriber
@@ -52,10 +55,11 @@ class IpAssignedMessageSubscriberTest {
         expireAt = LocalDate.now().withDayOfYear((2..365).random())
         ip = (1..4).map { (0..255).random() }
         ipAssignedEventHandler = mock()
+        loggingService = mock()
         messageSubscribeService = mock()
         messagePublishService = mock()
 
-        target = IpAssignedMessageSubscriber(ipAssignedEventHandler, messagePublishService, messageSubscribeService)
+        target = IpAssignedMessageSubscriber(ipAssignedEventHandler, loggingService, messagePublishService, messageSubscribeService)
         ipDto = IpDto(ip[0], ip[1], ip[2], ip[3])
         assignedIpDto = AssignedIpDto(assignedIpUuid, issuerUuid, assignerUuid, assignedAt, expireAt, ipDto)
         event = IpAssignedEvent(
@@ -80,6 +84,7 @@ class IpAssignedMessageSubscriberTest {
         whenever(message.messageProperties).thenReturn(messageProperties)
         whenever(message.body).thenReturn(eventStr.toByteArray())
         whenever(ipAssignedEventHandler.handle(eq(assignedIpDto.copy(uuid = 0)), any())).thenReturn(assignedIpDto.toMono())
+        whenever(loggingService.withLog(any<Mono<IpAssignedEvent>>(), any<Mono<AssignedIpDto>>(), any())).thenAnswer { return@thenAnswer it.arguments[1] }
 
         target.subscribe(message)
         verify(ipAssignedEventHandler, times(1)).handle(eq(assignedIpDto.copy(uuid = 0)), any())
@@ -92,6 +97,7 @@ class IpAssignedMessageSubscriberTest {
         whenever(messageProperties.receivedRoutingKey).thenReturn(Event.IP_ASSIGNED.routingKey)
         whenever(message.messageProperties).thenReturn(messageProperties)
         whenever(message.body).thenReturn(eventStr.toByteArray())
+        whenever(loggingService.withLog(any<Mono<IpAssignedEvent>>(), any<Mono<AssignedIpDto>>(), any())).thenAnswer { return@thenAnswer it.arguments[1] }
 
         target.subscribe(message)
         verify(ipAssignedEventHandler, never()).handle(eq(assignedIpDto), any())

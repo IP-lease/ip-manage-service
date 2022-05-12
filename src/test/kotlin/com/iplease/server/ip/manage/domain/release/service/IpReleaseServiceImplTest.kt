@@ -2,25 +2,26 @@ package com.iplease.server.ip.manage.domain.release.service
 
 import com.iplease.server.ip.manage.domain.release.exception.UnknownAssignedIpException
 import com.iplease.server.ip.manage.global.common.repository.AssignedIpRepository
+import com.iplease.server.ip.manage.infra.log.service.LoggingService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
+import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import kotlin.random.Random
 
 class IpReleaseServiceImplTest {
     private lateinit var assignedIpRepository: AssignedIpRepository
+    private lateinit var loggingService: LoggingService
     private lateinit var target: IpReleaseServiceImpl
 
     @BeforeEach
     fun setUp() {
         assignedIpRepository = mock()
-        target = IpReleaseServiceImpl(assignedIpRepository)
+        loggingService = mock()
+        target = IpReleaseServiceImpl(assignedIpRepository, loggingService)
     }
 
     @Test @DisplayName("할당IP 해제 - 해제 성공")
@@ -28,6 +29,8 @@ class IpReleaseServiceImplTest {
         val assignedIpUuid = Random.nextLong()
         whenever(assignedIpRepository.deleteById(assignedIpUuid)).thenReturn(true.toMono().then())
         whenever(assignedIpRepository.existsById(assignedIpUuid)).thenReturn(true.toMono())
+        whenever(loggingService.withLog(any<Long>(), any<Mono<Void>>(), any())).thenAnswer { return@thenAnswer it.arguments[1] }
+
         target.release(assignedIpUuid).block()
 
         verify(assignedIpRepository, times(1)).deleteById(assignedIpUuid)
@@ -37,6 +40,7 @@ class IpReleaseServiceImplTest {
     fun releaseFailureNotExist() {
         val assignedIpUuid = Random.nextLong()
         whenever(assignedIpRepository.existsById(assignedIpUuid)).thenReturn(false.toMono())
+        whenever(loggingService.withLog(any<Long>(), any<Mono<Void>>(), any())).thenAnswer { return@thenAnswer it.arguments[1] }
 
         val exception = assertThrows<UnknownAssignedIpException> { target.release(assignedIpUuid).block() }
 

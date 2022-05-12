@@ -61,10 +61,10 @@ class IpReleasedEventListenerTest {
         whenever(messageProperties.receivedRoutingKey).thenReturn(Event.IP_RELEASED.routingKey)
         whenever(message.messageProperties).thenReturn(messageProperties)
         whenever(message.body).thenReturn(eventByte)
-        whenever(ipReleaseEventHandler.handle(releasedIpDto)).thenReturn(releasedIpDto.toMono())
+        whenever(ipReleaseEventHandler.handle(releasedIpDto, Unit)).thenReturn(Unit.toMono())
 
         target.handle(message)
-        verify(ipReleaseEventHandler, times(1)).handle(any())
+        verify(ipReleaseEventHandler, times(1)).handle(releasedIpDto, Unit)
         verify(eventPublishService, never()).publish(any(), any())
     }
 
@@ -76,7 +76,7 @@ class IpReleasedEventListenerTest {
         whenever(message.body).thenReturn(eventByte)
 
         target.handle(message)
-        verify(ipReleaseEventHandler, never()).handle(any())
+        verify(ipReleaseEventHandler, never()).handle(any(), any())
         verify(eventPublishService, never()).publish(any(), any())
     }
 
@@ -89,7 +89,7 @@ class IpReleasedEventListenerTest {
         whenever(message.body).thenReturn(eventStr.toByteArray())
 
         target.handle(message)
-        verify(ipReleaseEventHandler, never()).handle(any())
+        verify(ipReleaseEventHandler, never()).handle(any(), any())
         verify(eventPublishService, times(1)).publish(
             Error.WRONG_PAYLOAD.routingKey,
             WrongPayloadError(Event.IP_RELEASED, message.body.toString())

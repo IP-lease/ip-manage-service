@@ -30,13 +30,13 @@ class IpAssignedEventListener(
             .registerModule(JavaTimeModule())
             .toMono()
             .map{ it.readValue(message.body, IpAssignedEvent::class.java) }
-            .doOnError{
+            .onErrorContinue {_, _ ->
                 eventPublishService.publish(
                     Error.WRONG_PAYLOAD.routingKey,
                     WrongPayloadError(Event.IP_ASSIGNED, message.body.toString())
                 )
             }.map{ it.toDto() }
-            .flatMap { ipAssignedEventHandler.handle(it) }
+            .flatMap { ipAssignedEventHandler.handle(it, it) }
             .block()
     }
 }

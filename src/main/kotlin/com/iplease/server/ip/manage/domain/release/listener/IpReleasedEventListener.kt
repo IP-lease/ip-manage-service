@@ -28,13 +28,14 @@ class IpReleasedEventListener(
             .registerKotlinModule()
             .toMono()
             .map { it.readValue(message.body, IpReleasedEvent::class.java) }
-            .doOnError {
+            .onErrorContinue{_, _ ->
                 eventPublishService.publish(
                     Error.WRONG_PAYLOAD.routingKey,
                     WrongPayloadError(Event.IP_RELEASED, message.body.toString())
                 )
-            }.map { it.toDto()}
-            .flatMap { ipReleaseEventHandler.handle(it) }
+            }
+            .map { it.toDto()}
+            .flatMap { ipReleaseEventHandler.handle(it, Unit) }
             .block()
     }
 }

@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class IpAssignLoggerUtil: SimpleLoggerUtil<AssignedIpDto, AssignedIpDto>(
-    LoggerFactory.getLogger(IpAssignLoggerUtil::class.java),
+class IpAssignServiceLoggerUtil: SimpleLoggerUtil<AssignedIpDto, AssignedIpDto>(
+    LoggerFactory.getLogger(IpAssignServiceLoggerUtil::class.java),
     "[SERV] [IP 할당 - 등록]"
 ) {
     override fun logOnStart(input: AssignedIpDto, uuid: String) {

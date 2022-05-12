@@ -3,8 +3,6 @@ package com.iplease.server.ip.manage.infra.log.service
 import com.iplease.server.ip.manage.infra.log.type.LoggerType
 import com.iplease.server.ip.manage.infra.log.util.*
 import org.springframework.stereotype.Service
-import java.util.*
-import kotlin.collections.HashMap
 
 @Service
 class LoggingServiceImpl(
@@ -20,6 +18,7 @@ class LoggingServiceImpl(
     private val ipReleaseServiceLoggerUtil: IpReleaseServiceLoggerUtil,
     private val ipReleaseReserveLoggerUtil: IpReleaseReserveLoggerUtil
 ): LoggingService {
+    @Suppress("IMPLICIT_CAST_TO_ANY", "UNCHECKED_CAST")
     override fun <IN, OUT> getLoggerUtil(type: LoggerType): LoggerUtil<IN, OUT> =
         when (type) {
             //EVENT

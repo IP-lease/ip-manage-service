@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.iplease"
-version = "0.0.1-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 configurations {
@@ -30,7 +30,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(files("libs/proto-lib-0.0.1-SNAPSHOT.jar"))
+    implementation(files("libs/proto-lib-0.0.1-RELEASE.jar"))
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")

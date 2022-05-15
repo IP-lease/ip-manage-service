@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class EventSubscribeLoggerUtil: SimpleLoggerUtil<EventSubscribeInput, Unit>(
-    LoggerFactory.getLogger(EventPublishLoggerUtil::class.java),
+    LoggerFactory.getLogger(EventSubscribeLoggerUtil::class.java),
     "[AMQP] [이벤트 - 구독]"
 ) {
     override fun logOnStart(input: EventSubscribeInput, uuid: String) {

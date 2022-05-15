@@ -24,19 +24,19 @@ abstract class EventMessageSubscriberV2<T: Any> (
 
     private fun parse(message: Message) =
         ObjectMapper()
-        .registerModule(KotlinModule())
-        .registerModule(JavaTimeModule())
-        .toMono()
-        .map{ it.readValue(message.body, type.java) }
-        .onErrorContinue {_, _ ->
-            messagePublishService.publishError(Error.WRONG_PAYLOAD, WrongPayloadError(event, message.body.toString()))
-        }
+            .registerModule(KotlinModule())
+            .registerModule(JavaTimeModule())
+            .toMono()
+            .map{ it.readValue(message.body, type.java) }
+            .doOnError { messagePublishService.publishError(Error.WRONG_PAYLOAD, WrongPayloadError(event, "")) }
 
     override fun subscribe(message: Message) {
         if(message.messageProperties.receivedRoutingKey != event.routingKey) return
         parse(message)
             .map { type.cast(it) }
             .let { handle(it) }
+            .map {  }
+            .onErrorReturn(Unit)
             .block()
     }
 

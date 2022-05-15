@@ -101,6 +101,6 @@ class IpAssignedMessageSubscriberTest {
 
         target.subscribe(message)
         verify(ipAssignedEventHandler, never()).handle(eq(assignedIpDto), any())
-        verify(messagePublishService, times(1)).publishError(Error.WRONG_PAYLOAD, WrongPayloadError(Event.IP_ASSIGNED, message.body.toString()))
+        verify(messagePublishService, times(1)).publishError(Error.WRONG_PAYLOAD, WrongPayloadError(Event.IP_ASSIGNED))
     }
 }

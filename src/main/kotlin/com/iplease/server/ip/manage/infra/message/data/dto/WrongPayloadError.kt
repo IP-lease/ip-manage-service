@@ -4,8 +4,7 @@ import com.iplease.server.ip.manage.infra.message.data.ErrorData
 import com.iplease.server.ip.manage.infra.message.data.type.Event
 
 data class WrongPayloadError(
-    private val originEvent: Event,
-    val payload: String
+    private val originEvent: Event
 ): ErrorData {
     init { val originRoutingKey = originEvent.routingKey }
 }

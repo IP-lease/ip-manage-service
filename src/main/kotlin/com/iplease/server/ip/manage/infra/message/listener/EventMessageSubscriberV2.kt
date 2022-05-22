@@ -28,7 +28,8 @@ abstract class EventMessageSubscriberV2<T: Any> (
             .registerModule(JavaTimeModule())
             .toMono()
             .map{ it.readValue(message.body, type.java) }
-            .doOnError { messagePublishService.publishError(Error.WRONG_PAYLOAD, WrongPayloadError(event)) }
+            .doOnError{messagePublishService.publishError(Error.WRONG_PAYLOAD, WrongPayloadError(event)) }
+            .onErrorResume { Mono.empty() }
 
     override fun subscribe(message: Message) {
         if(message.messageProperties.receivedRoutingKey != event.routingKey) return
